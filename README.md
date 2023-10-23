@@ -3,10 +3,10 @@ Improve the accuracy of database search by using BERT to embed MS/MS reasonably
 # 1. Introduction
 
 # 2. Depends
-[Anaconda](https://www.anaconda.com) for Python 3.9
-[Pytorch](https://pytorch.org/) 1.12
+[Anaconda](https://www.anaconda.com) for Python 3.9  
+[Pytorch](https://pytorch.org/) 1.12  
 # 3. Install
-Install anaconda
+Install anaconda  
 2.Install [Git](https://git-scm.com/downloads)  
 3.Open commond line, create environment and enter with the following commands.   
 ```
