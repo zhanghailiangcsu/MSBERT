@@ -4,16 +4,12 @@ Created on Fri Jun 16 08:49:25 2023
 
 @author: Administrator
 """
-import os
-os.chdir('E:/github/MSBERT')
 import torch.nn as nn
 import torch
 import math
 import torch.nn.functional as F
 import torch.utils.data as Data
-from torch.utils.data import DataLoader
 import pickle
-import torch.optim as optim
 import numpy as np
 from process_data import make_train_data,make_test_data
 import matplotlib.pyplot as plt
@@ -83,84 +79,11 @@ class Mask(nn.Module):
         
         return mask_x,mask_token_list,mask_pos_list
 
-# =============================================================================
-# class Mask(nn.Module):
-#     def __init__(self,max_pred,mask_vec):
-#         super(Mask, self).__init__()
-#         self.max_pred = max_pred
-#         self.mask_vec = mask_vec
-#     
-#     def forward(self,embed_tensor):
-#         reduce_tensor = []
-#         # mask_bool = []
-#         mask_pos_list = []
-#         for i in range(embed_tensor.shape[0]):
-#             # mask_bool_ = torch.zeros(1,embed_tensor.shape[1])
-#             mask_pos = torch.LongTensor(sorted(random.sample(range(5),self.max_pred)))
-#             # mask_pos = torch.LongTensor(random.sample(range(5),2))
-#             # mask_bool.append(mask_bool_)
-#             reduce_tensor.append(embed_tensor[i,mask_pos,:])
-#             mask_tensor = embed_tensor.clone()
-#             mask_tensor[i,mask_pos,:] = self.mask_vec
-#             mask_pos_list.append(mask_pos.unsqueeze(0))
-#         reduce_tensor = torch.stack(reduce_tensor,dim=0)  
-#         # mask_bool = torch.cat(mask_bool,dim=0)
-#         mask_pos_list = torch.cat(mask_pos_list,dim=0)
-#         mask_pos_list = mask_pos_list.to(device)
-#         return mask_tensor,reduce_tensor,mask_pos_list
-# =============================================================================
-        
-# =============================================================================
-# class Mask(nn.Module):
-#     def __init__(self,ratio,max_pred):
-#         super(Mask , self).__init__()
-#         self.ratio = ratio
-#         self.max_pred = max_pred
-#         
-#     def forward(self,x):
-#         mask_bool_list = []
-#         mask_token_list =[]
-#         mask_pos_list = []
-#         
-#         for p in range(x.shape[0]):
-#             pos_p = torch.where(x[p,:]==0)[0]
-#             if len(pos_p) == 0:
-#                 pos_p = x.shape[1]
-#             else:
-#                 pos_p = pos_p[0]
-#             len_mask = int(pos_p*self.ratio)
-#             if len_mask < 1:
-#                 len_mask = 1
-#             if len_mask > self.max_pred:
-#                 len_mask = torch.tensor(self.max_pred)
-#             mask_pos = torch.randperm(pos_p)[0:len_mask].to(device)
-#             mask_bool = torch.rand(x.shape[1]) > 1
-#             mask_bool[mask_pos] = True
-#             mask_bool = mask_bool.to(device)
-#             mask_bool_list.append(mask_bool.unsqueeze(0))
-#             mask_token = x[p,:][mask_pos]
-#             if len_mask < self.max_pred:
-#                 n_pad = self.max_pred - len_mask
-#                 mask_pos = torch.cat((mask_pos,torch.zeros(n_pad).long().to(device)),dim=0)
-#                 mask_token = torch.cat((mask_token,torch.zeros(n_pad).long().to(device)),dim=0)
-#                 mask_token_list.append(mask_token.unsqueeze(0))
-#                 mask_pos_list.append(mask_pos.unsqueeze(0))
-#         mask_bool = torch.cat(mask_bool_list,dim = 0)
-#         mask_x = torch.masked_fill(x, mask_bool,1)
-#         mask_token_list = torch.cat(mask_token_list,dim=0)
-#         mask_pos_list = torch.cat(mask_pos_list,dim=0)
-#         mask_token_list = mask_token_list.long()
-#         mask_pos_list = mask_pos_list.long()
-#         return mask_x,mask_token_list,mask_pos_list
-# =============================================================================
-
 
 class PositionalEmbedding(nn.Module):
 
     def __init__(self, d_model, max_len):
         super().__init__()
-
-        # Compute the positional encodings once in log space.
         pe = torch.zeros(max_len, d_model).float()
         pe.require_grad = False
 
@@ -199,33 +122,15 @@ class Attention(nn.Module):
     def forward(self, query, key, value, mask=None, dropout=None):
         scores = torch.matmul(query, key.transpose(-2, -1)) \
                  / math.sqrt(query.size(-1))
-        # print(query.size())
-        # print(key.size())
-        # print(value.size())
-        # s1 = scores.detach().cpu().numpy()
-        # plt.figure(1)
-        # sns.heatmap(s1[0,0,:,:])
                  
         if mask is not None:
             scores = scores.masked_fill(mask, -1e9)
-        # s1 = scores.detach().cpu().numpy()
-        # plt.figure(2)
-        # sns.heatmap(s1[0,0,:,:])
 
         p_attn = F.softmax(scores, dim=-1)
-        # print(p_attn.size())
-        # s1 = p_attn.detach().cpu().numpy()
-        # plt.figure(1)
-        # sns.heatmap(s1[0,0,:,:])
         
 
         if dropout is not None:
             p_attn = dropout(p_attn)
-        # sb = torch.matmul(p_attn, value)
-        # print(sb.size())
-        # sb = sb.detach().cpu().numpy()
-        # plt.figure(2)
-        # sns.heatmap(sb[0,0,:,:])
 
         return torch.matmul(p_attn, value), p_attn
 
@@ -234,8 +139,6 @@ class MultiHeadedAttention(nn.Module):
     def __init__(self, h, d_model, dropout):
         super().__init__()
         assert d_model % h == 0
-
-        # We assume d_v always equals d_k
         self.d_k = d_model // h
         self.h = h
 
@@ -250,11 +153,8 @@ class MultiHeadedAttention(nn.Module):
 
         query, key, value = [l(x).view(batch_size, -1, self.h, self.d_k).transpose(1, 2)
                              for l, x in zip(self.linear_layers, (query, key, value))]
-        # q,k,v batch*nhead*maxlen*d_k
         x, attn = self.attention(query, key, value, mask=mask, dropout=self.dropout)
-        # x batch*nhead*maxlen*batch
         x = x.transpose(1, 2).contiguous().view(batch_size, -1, self.h * self.d_k)
-        # x batch*max_len*dmodel
 
         return self.output_linear(x)
 
@@ -266,11 +166,9 @@ class SublayerConnection(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, sublayer):
-        # x.size batch*maxlen*d_model
         return x + self.dropout(sublayer(self.norm(x)))
 
 class PositionwiseFeedForward(nn.Module):
-    "Implements FFN equation."
 
     def __init__(self, d_model, d_ff, dropout):
         super(PositionwiseFeedForward, self).__init__()
@@ -295,9 +193,7 @@ class TransformerBlock(nn.Module):
 
     def forward(self, x, mask):
         x = self.input_sublayer(x, lambda _x: self.attention.forward(_x, _x, _x, mask=mask))
-        # x.size batch*maxlen*d_model
         x = self.output_sublayer(x, self.feed_forward)
-        # x.size batch*maxlen*d_model
         return self.dropout(x)
 
 def get_attn_pad_mask(x):
@@ -322,7 +218,6 @@ class BERT(nn.Module):
 
         self.transformer_blocks = nn.ModuleList(
             [TransformerBlock(hidden, attn_heads, hidden * 4, dropout) for _ in range(n_layers)])
-        # self.mask_vec = torch.rand(1,hidden).to(device)
         self.mask = Mask(ratio,max_pred)
         self.fc2 = nn.Linear(hidden, vocab_size, bias=False)
         self.activ2 = nn.GELU()
@@ -342,59 +237,22 @@ class BERT(nn.Module):
 
 
     def forward(self, input_id,intensity):
-        # atten_mask1 = (input_id == 0).unsqueeze(1).repeat(1, input_ids.size(1), 1).unsqueeze(1)
         mask_x1,mask_token1,mask_pos1 =  self.mask(input_id,intensity) 
         mask_x2,mask_token2,mask_pos2 =  self.mask(input_id,intensity)
-        # inten = intensity.squeeze(1).unsqueeze(2).repeat(1,1,self.hidden)
         inten = intensity.transpose(1,2)
         inten = self.intensity_linear(inten)
         
         output1 = self.embedding(mask_x1)
         output1 = output1 + inten
-        # output1 = torch.cat((output1,inten),dim=2)
-        # output1 = self.linear(output1)
-        
-        # output1 = torch.mul(inten,output1)
         output2 = self.embedding(mask_x2)
         output2 = output2 + inten
-        # output2 = torch.cat((output2,inten),dim=2)
-        # output2 = self.linear(output2)
-        # output2 = torch.mul(inten,output2)
-        # output size,64*100*512
         
-        # atten_mask = (intensity == 0).repeat(1, intensity.size(2), 1).unsqueeze(1).to(device)
-        # output1,reduce_tensor1,mask_pos1 = self.mask(embed_data)
-        # output2,reduce_tensor2,mask_pos2 = self.mask(embed_data)
-        
-        # for transformer in self.transformer_blocks:
-        #     output1 = transformer.forward(output1, atten_mask)
-        # pool1 = torch.matmul(intensity,output1)
-        # pool1 = pool1/intensity.shape[1]
-        
-        # for transformer in self.transformer_blocks:
-        #     output2 = transformer.forward(output2, atten_mask)
-        # pool2 = torch.matmul(intensity,output2)
-        # pool2 = pool2/intensity.shape[1]
-        
-        # mask_pos1_ = mask_pos1[:, :, None].expand(-1, -1, self.hidden)
-        # h_masked1 = torch.gather(output1, 1, mask_pos1_)
-        # h_masked1 = self.activ2(self.linear(h_masked1))               
-        # logits_lm1 = self.fc2(h_masked1)
-        
-        # mask_pos2_ = mask_pos2[:, :, None].expand(-1, -1, self.hidden) 
-        # h_masked2 = torch.gather(output2, 1, mask_pos2_)              
-        # h_masked2 = self.activ2(self.linear(h_masked2))               
-        # logits_lm2 = self.fc2(h_masked2) 
-        
-        
-        # atten_mask1 = get_attn_pad_mask(mask_x1)
         atten_mask1 = (mask_x1 == 0).unsqueeze(1).repeat(1, mask_x1.size(1), 1).unsqueeze(1)
         for transformer in self.transformer_blocks:
             output1 = transformer.forward(output1, atten_mask1)
         pool1 = torch.matmul(intensity,output1)
         pool1 = pool1/intensity.shape[1]
         
-        # atten_mask2 = get_attn_pad_mask(mask_x2)
         atten_mask2 = (mask_x2 == 0).unsqueeze(1).repeat(1, mask_x2.size(1), 1).unsqueeze(1)
         for transformer in self.transformer_blocks:
             output2 = transformer.forward(output2, atten_mask2)
@@ -415,20 +273,10 @@ class BERT(nn.Module):
     
     def predict(self,input_id,intensity):
         
-        # atten_mask = (intensity == 0).repeat(1, intensity.size(2), 1).unsqueeze(1).to(device)
-        # for transformer in self.transformer_blocks:
-        #     embed_data = transformer.forward(embed_data, atten_mask)
-        # pool = torch.matmul(intensity,embed_data)
-        # pool = pool/intensity.shape[1]
-        
         output = self.embedding(input_id)
         inten = intensity.transpose(1,2)
         inten = self.intensity_linear(inten)
         output = output + inten
-        # output = torch.cat((output,inten),dim=2)
-        # output = self.linear(output)
-        # inten = intensity.squeeze(1).unsqueeze(2).repeat(1,1,self.hidden)
-        # output = torch.mul(inten,output)
         
         atten_mask = (input_id == 0).unsqueeze(1).repeat(1, input_id.size(1), 1).unsqueeze(1)
         for transformer in self.transformer_blocks:                                  
@@ -439,19 +287,6 @@ class BERT(nn.Module):
         return pool
 
 
-
-def intensity_filter(data,ratio = 0.01,min_len = 5):
-    data_new = []
-    for d in data:
-        d_peak = d[1]
-        position = [p for p,v in enumerate(d_peak[1]) if v > ratio]
-        d_intensity = d_peak[1][position]
-        d_p = [d_peak[0][p] for p in position]
-        if len(d_p) < min_len:
-            continue
-        data_new.append([d[0],[d_p,d_intensity]])
-    return data_new
-   
 def plot_step_loss(train_loss,step=100):
     all_loss = [p for i in train_loss for p in i]
     step_loss = [all_loss[i:i+step] for i in range(0,len(all_loss),step)]
