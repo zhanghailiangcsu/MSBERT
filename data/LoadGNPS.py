@@ -4,9 +4,6 @@ Created on Mon Apr 10 09:50:08 2023
 
 @author: Administrator
 """
-#复制的别人的使用matchms读取GNPS的代码
-#读取和过滤的代码
-# 今天的任务是整理代码成函数。
 import numpy as np
 from collections import Counter
 from tqdm import tqdm
