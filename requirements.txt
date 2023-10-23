@@ -1,0 +1,13 @@
+gensim==4.3.0
+info-nce-pytorch==0.1.4
+matchms==0.18.0
+matplotlib==3.5.3
+numpy==1.22.4
+optuna==3.3.0
+pandas==1.4.3
+scikit-learn==1.1.2
+scipy==1.7.3
+seaborn==0.11.2
+spec2vec==0.8.0
+timm==0.6.7
+tqdm==4.64.0
