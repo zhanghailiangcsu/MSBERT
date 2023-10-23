@@ -7,7 +7,7 @@ Created on Wed Mar 29 10:45:34 2023
 import os
 os.chdir('E:/github/MSBERT')
 import numpy as np
-from MSBERTModel2 import BERT,MyDataSet
+from model.MSBERTModel import BERT,MyDataSet
 from LoadHMDB import LoadCFMHMDB
 from process_data import make_train_data,ms_word,make_test_data
 import torch.utils.data as Data
