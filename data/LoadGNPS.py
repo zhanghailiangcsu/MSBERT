@@ -103,15 +103,12 @@ def PrecursorFilter(spectrums_pos_annotated):
             spectrums_filter.append(spec)
     return spectrums_filter
 
-# spec = spectrums_pos_annotated[0]
 def InstrumentFilter(spectrums_pos_annotated):
-    # spectrums_filter = []
     orbitrap = []
     qtof = []
     other = []
     for spec in tqdm(spectrums_pos_annotated):
         instrument = spec.metadata['instrument']
-        # spectrums_filter.append(instrument)
         instrument = instrument.lower()
         if instrument == 'orbitrap':
             orbitrap.append(spec)
@@ -120,18 +117,6 @@ def InstrumentFilter(spectrums_pos_annotated):
         else:
             other.append(spec)
     return orbitrap,qtof,other
-# instrument = [i.metadata['instrument'] for i in spectrums_filetr]
-# sbb = list(set(spectrums_filter))
-
-# instrument_list = [i.lower() for i in instrument]
-# instrument_list2 = Counter(instrument_list)
-
-# instrument_list2 = [i for i in instrument_list if 'qtof'in i or 'q-tof' in i or 'tof' in i]
-# position = [i for i,v in enumerate(instrument_list) if v == 'orbitrap']
-
-# sb = [spectrums_pos_annotated[i].metadata['collision_energy'] for i in position]
-# l = [len(i) for i in sb]
-# l2 = [i for i in l if i !=0]
 
 def make_dataset(spectrums_pos_annotated,n_max=100,test_size=0.2,n_decimals=2):
     #首先是把smile和谱对应起来，保证训练集和测试集中没有重复的化合物，
@@ -150,9 +135,6 @@ def make_dataset(spectrums_pos_annotated,n_max=100,test_size=0.2,n_decimals=2):
         smi = spec.get("smiles")
         position = smiles_unique.index(smi)
         spectrum_all[position].append(spec)
-    
-    # l = [len(i)for i in spectrum_all]
-    # spec_list = spectrum_all[1]
     number = int(len(spectrum_all)*(1-test_size))
     train_ref.append(spectrum_all[0])
     for spec_list in tqdm(spectrum_all[1:number]):
