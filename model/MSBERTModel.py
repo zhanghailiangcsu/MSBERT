@@ -12,19 +12,12 @@ import math
 import torch.nn.functional as F
 import torch.utils.data as Data
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 import pickle
 import torch.optim as optim
 import numpy as np
-from process_data import make_train_data,ms_word,make_n_data,make_test_data
+from process_data import make_train_data,make_test_data
 import matplotlib.pyplot as plt
-
-from info_nce import InfoNCE
-
-from timm.scheduler import CosineLRScheduler
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-import seaborn as sns
-import random
 from LoadGNPS import pro_dataset
 
 
@@ -445,57 +438,7 @@ class BERT(nn.Module):
         pool = pool/intensity.shape[1]  
         return pool
 
-def model_embed(model,test_data,batch_size):
-    input_ids, intensity = zip(*test_data)
-    intensity = [torch.FloatTensor(i) for i in intensity] 
-    dataset = MyDataSet(input_ids,intensity)
-    dataloader = Data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    model.eval()
-    embed_list = []
-    with torch.no_grad():
-        for step,(input_id,intensity_) in tqdm(enumerate(dataloader)):
-            input_id = input_id.to(device)
-            intensity_ = intensity_.to(device)
-            pool = model.predict(input_id,intensity_)
-            embed_list.append(pool.cpu().numpy())
-    return embed_list
 
-def search_top(dataset_arr,query_arr,dataset_smiles,query_smiles,batch):
-    top1 = []
-    top5 = []
-    top10 = []
-    start = 0
-    n_dataset = np.linalg.norm(dataset_arr,axis=1)
-    n_dataset = n_dataset.reshape(n_dataset.shape[0],1)
-    while start < query_arr.shape[0]:
-        end = start+batch
-        q_i = query_arr[start:end,:]
-        n_q = np.linalg.norm(q_i,axis =1)
-        n_q = n_q.reshape(1,n_q.shape[0])
-        n_q = np.repeat(n_q,n_dataset.shape[0],axis=0)
-        dot = np.dot(dataset_arr,q_i.T)
-        n_d = np.repeat(n_dataset,q_i.shape[0],axis=1)
-        sim = dot/(n_d*n_q)
-        sort = np.argsort(sim,axis = 0)
-        sort = np.flipud(sort)
-        for s in range(sort.shape[1]):
-            smi_q = query_smiles[(s+start)]
-            smi_dataset = [dataset_smiles[i] for i in sort[0:10,s]]
-            if smi_q in smi_dataset:
-                top10.append(1)
-            smi_dataset = [dataset_smiles[i] for i in sort[0:5,s]]
-            if smi_q in smi_dataset:
-                top5.append(1)
-            smi_dataset = [dataset_smiles[i] for i in sort[0:1,s]]
-            if smi_q in smi_dataset:
-                top1.append(1)
-        start += batch
-    top1 = len(top1)/len(query_smiles)
-    top5 = len(top5)/len(query_smiles)
-    top10 = len(top10)/len(query_smiles)
-    return [top1,top5,top10]
 
 def intensity_filter(data,ratio = 0.01,min_len = 5):
     data_new = []
@@ -517,189 +460,7 @@ def plot_step_loss(train_loss,step=100):
     plt.xlabel('steps')
     plt.ylabel('loss')
 
-def train_bert(model,input_ids,intensity,batch_size,epochs,lr):
-    
-    input_ids_train,intensity_train,input_ids_val,intensity_val = dataset_sep(input_ids,intensity,val_size = 0.1)
-    
-    dataset = MyDataSet(input_ids_train,intensity_train)
-    dataloader = Data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    dataset_val = MyDataSet(input_ids_val,intensity_val)
-    dataloader_val = Data.DataLoader(dataset_val, batch_size=batch_size, shuffle=True)
-    
-    criterion = nn.CrossEntropyLoss(ignore_index=0)
-    infoloss = InfoNCE(temperature=0.01)
-    optimizer = optim.AdamW(model.parameters(), lr=lr,weight_decay=0.01)
-    steps = epochs*len(dataloader)
-    scheduler = CosineLRScheduler(optimizer, t_initial=steps, lr_min=0.1 * lr, warmup_t=int(0.1*steps), warmup_lr_init=0)
-    
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    train_loss = []
-    val_loss = []
-    step_count = 0
-    # lr_s = []
-    # plt.plot(lr_s)
-    # epoch = 0
-    
-    for epoch in range(epochs):
-        model.train()
-        epoch_loss = []
-        for step,(input_id,intensity_) in enumerate(dataloader):
-            input_id = input_id.to(device)
-            intensity_ = intensity_.to(device)
-            logits_lm1,mask_token1,pool1,logits_lm2,mask_token2,pool2 = model(input_id, intensity_)
-            loss1 = criterion(logits_lm1.transpose(1,2), mask_token1)
-            loss2 = criterion(logits_lm2.transpose(1,2), mask_token2)
-            loss3 = infoloss(pool1.squeeze(),pool2.squeeze())
-            loss = loss1+loss2+loss3
-            epoch_loss.append(loss.item())
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            # lr_s.append(optimizer.param_groups[0]['lr'])
-            scheduler.step(step_count)
-            step_count += 1 
-            # print(step)
-        train_loss.append(epoch_loss)
-        # torch.save(model.state_dict(),'model/'+str(epoch)+'.pkl')
-        print(str(epoch)+'epoch train_loss'+str(np.nanmean(epoch_loss)))
-        
-        model.eval()
-        with torch.no_grad():
-            val_step_loss = []
-            for step,(input_id,intensity_) in enumerate(dataloader_val):
-                input_id = input_id.to(device)
-                intensity_ = intensity_.to(device)
-                logits_lm1,mask_token1,pool1,logits_lm2,mask_token2,pool2 = model(input_id, intensity_)
-                loss1 = criterion(logits_lm1.transpose(1,2), mask_token1)
-                loss2 = criterion(logits_lm2.transpose(1,2), mask_token2)
-                loss3 = infoloss(pool1.squeeze(),pool2.squeeze())
-                loss = loss1+loss2+loss3
-                val_step_loss.append(loss.item())
-            val_loss.append(val_step_loss)
-            print(str(epoch)+'epoch val_loss'+str(np.nanmean(val_step_loss)))
-            
-    # torch.save(model.state_dict(),'E:/MSBERT_model/912/orbitrap.pkl') 
-    return model,train_loss,val_loss
 
-def pre_train(model,input_ids,intensity,batch_size,epochs,lr):
-    
-    input_ids_train,intensity_train,input_ids_val,intensity_val = dataset_sep(input_ids,intensity,val_size = 0.1)
-    
-    dataset = MyDataSet(input_ids_train,intensity_train)
-    dataloader = Data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    dataset_val = MyDataSet(input_ids_val,intensity_val)
-    dataloader_val = Data.DataLoader(dataset_val, batch_size=batch_size, shuffle=True)
-    
-    criterion = nn.CrossEntropyLoss(ignore_index=0)
-    optimizer = optim.Adam(model.parameters(), lr=lr,weight_decay=0.01)
-    steps = epochs*len(dataloader)
-    scheduler = CosineLRScheduler(optimizer, t_initial=steps, lr_min=0.1 * lr, warmup_t=int(0.1*steps), warmup_lr_init=0)
-    
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    train_loss = []
-    step_count = 0
-    val_loss = []
-    
-    
-    for epoch in range(epochs):
-        epoch_loss = []
-        model.train()
-        for step,(input_id,intensity_) in enumerate(dataloader):
-            input_id = input_id.to(device)
-            intensity_ = intensity_.to(device)
-            
-            logits_lm1,mask_token1,_,_,_,_ = model(input_id, intensity_)
-            loss = criterion(logits_lm1.transpose(1,2), mask_token1)
-            epoch_loss.append(loss.item())
-            optimizer.zero_grad()
-            loss.backward()
-            
-            scheduler.step(step_count)
-            step_count += 1
-            optimizer.step()
-            # print(step)
-        train_loss.append(epoch_loss)
-        print(str(epoch)+'epoch train_loss'+str(np.nanmean(epoch_loss)))
-        
-        model.eval()
-        with torch.no_grad():
-            val_step_loss = []
-            for step,(input_id,intensity_) in enumerate(dataloader_val):
-                input_id = input_id.to(device)
-                intensity_ = intensity_.to(device)
-                logits_lm1,mask_token1,_,_,_,_ = model(input_id, intensity_)
-                loss = criterion(logits_lm1.transpose(1,2), mask_token1)
-                val_step_loss.append(loss.item())
-            val_loss.append(val_step_loss)
-            print(str(epoch)+'epoch val_loss'+str(np.nanmean(val_step_loss)))
-                
-        # torch.save(model.state_dict(),'E:/MSBERT_model/912/orbitrap.pkl')
-    return model,train_loss,val_loss
-
-def Contrastive_finetune(model,input_id,intensity,batch_size,epochs,lr,temperature):
-    # temperature = 0.01
-    # epochs = 20
-    # lr = lr*0.1
-    
-    # path = 'E:/MSBERT_model/two_stage/2.pkl'
-    # model.load_state_dict(torch.load(path))
-    
-    
-    fine_loss = []
-    val_loss = []
-    
-    input_ids_train,intensity_train,input_ids_val,intensity_val = dataset_sep(input_ids,intensity,val_size = 0.1)
-    
-    dataset = MyDataSet(input_ids_train,intensity_train)
-    dataloader = Data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    dataset_val = MyDataSet(input_ids_val,intensity_val)
-    dataloader_val = Data.DataLoader(dataset_val, batch_size=batch_size, shuffle=True)
-    
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    infoloss = InfoNCE(temperature=temperature)
-    optimizer = optim.Adam(model.parameters(), lr=lr,weight_decay=0.01)
-    steps = epochs*len(dataloader)
-    scheduler = CosineLRScheduler(optimizer, t_initial=steps, lr_min=0.1 * lr, warmup_t=int(0.1*steps), warmup_lr_init=0)
-    step_count = 0
-    
-    for epoch in range(epochs):
-        model.train()
-        epoch_loss = []
-        for step,(input_id,intensity_) in enumerate(dataloader):
-            input_id = input_id.to(device)
-            intensity_ = intensity_.to(device)
-            # pool1 = model.predict(input_id,intensity_)
-            # pool2 = model.predict(input_id,intensity_)
-            _,_,pool1,_,_,pool2 = model(input_id, intensity_)
-            loss = infoloss(pool1.squeeze(),pool2.squeeze())
-            epoch_loss.append(loss.item())
-            optimizer.zero_grad()
-            loss.backward()
-            scheduler.step(step_count)
-            step_count += 1
-            optimizer.step()
-        print(str(epoch)+'epoch train_loss'+str(np.nanmean(epoch_loss)))
-        fine_loss.append(epoch_loss)
-        
-        model.eval()
-        with torch.no_grad():
-            val_step_loss = []
-            for step,(input_id,intensity_) in enumerate(dataloader_val):
-                input_id = input_id.to(device)
-                intensity_ = intensity_.to(device)
-                # pool1 = model.predict(input_id,intensity_)
-                # pool2 = model.predict(input_id,intensity_)
-                _,_,pool1,_,_,pool2 = model(input_id, intensity_)
-                loss = infoloss(pool1.squeeze(),pool2.squeeze())
-                val_step_loss.append(loss.item())
-            val_loss.append(val_step_loss)
-            print(str(epoch)+'epoch val_loss'+str(np.nanmean(val_step_loss)))
-            
-        # torch.save(model.state_dict(),'E:/MSBERT_model/two_stage/2.pkl')
-    return model,fine_loss,val_loss
 
 if __name__ == '__main__':
     
