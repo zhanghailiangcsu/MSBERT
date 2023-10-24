@@ -58,8 +58,12 @@ if __name__ == '__main__':
     with open('GNPSdata/qtof.pickle', 'rb') as f:
         qtof = pickle.load(f)
     ref_data,query_data,smile_ref,smile_query = ParseOtherData(qtof)
-    MSBERTQtofTop = bertonother(MSBERTModel,ref_data,query_data,smile_ref,smile_query)
+    MSBERTQtofTop = CalMSBERTTop(model,ref_data,query_data,smile_ref,smile_query)
     
+    with open('GNPSdata/other.pickle', 'rb') as f:
+        other = pickle.load(f)
+    ref_data,query_data,smile_ref,smile_query = ParseOtherData(other)
+    MSBERTOtherTop = CalMSBERTTop(model,ref_data,query_data,smile_ref,smile_query)
     
     
 
