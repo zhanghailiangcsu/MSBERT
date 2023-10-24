@@ -4,26 +4,9 @@ Created on Wed Mar 29 08:50:48 2023
 
 @author: Administrator
 """
-import random
 import numpy as np
 
-# def pro_msms(msmsinfo,n_decimals,min_len,max_mz):
-#     mz = [i[:,0] for i in msmsinfo]
-#     intensity = [i[:,1] for i in msmsinfo]
-#     peak_info = []
-#     for i in tqdm(range(len(mz))):
-#         mz_ = [j for j in mz[i] if j <= max_mz]
-#         if len(mz_) < min_len:
-#             peak_info.append([])
-#             continue
-#         mz_ = [round(j,n_decimals) for j in mz_]
-#         mz_ = ['peak@'+str(j) for j in mz_]
-#         intensity_ = intensity[i][0:len(mz_)]
-#         intensity_ = intensity_*100/max(intensity_)
-#         peak_info.append([mz_,intensity_])
-#     return peak_info
-
-def make_test_data(sentences,precursor,word2idx,maxlen):
+def MakeTestData(sentences,precursor,word2idx,maxlen):
     intensity = [i[1] for i in sentences]
     intensity = [np.hstack((2,i)) for i in intensity]
     peaks = [i[0] for i in sentences]
@@ -46,9 +29,7 @@ def make_test_data(sentences,precursor,word2idx,maxlen):
         test_data.append([input_ids,intensity2])
     return test_data
 
-
-
-def make_train_data(sentences,precursor,maxlen):
+def MakeTrainData(sentences,precursor,maxlen):
     intensity = [i[1] for i in sentences]
     intensity = [np.hstack((2,i)) for i in intensity]
     peaks = [i[0] for i in sentences]
