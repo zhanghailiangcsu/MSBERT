@@ -12,7 +12,7 @@ from data.ProcessData import make_train_data,make_test_data
 import torch
 from model.MSBERTModel import MSBERT
 from model.Train import  TrainMSBERT
-from model.utils import model_embed,search_top,ParseOrbitrap
+from model.utils import ModelEmbed,SearchTop,ParseOrbitrap,CalMSBERTTop
 import numpy as np
 
 
@@ -34,6 +34,10 @@ if __name__ == '__main__':
     test_ref,msms3,precursor3,smiles3 = ParseOrbitrap('GNPSdata/ob_test_ref.pickle')
     test_query,msms4,precursor4,smiles4 = ParseOrbitrap('GNPSdata/ob_test_query.pickle')
     
+    train_ref,word2idx = make_train_data(msms1,precursor1,100)
+    train_query,word2idx = make_train_data(msms2,precursor2,100)
+    test_ref,word2idx = make_train_data(msms3,precursor3,100)
+    test_query,word2idx = make_train_data(msms4,precursor4,100)
     train_data,word2idx = make_train_data(msms1,precursor1,maxlen)
     
     vocab_size = len(word2idx)
@@ -44,15 +48,16 @@ if __name__ == '__main__':
     model,train_loss,val_loss = TrainMSBERT(model,input_ids,intensity,batch_size,epochs,lr,temperature)
     torch.save(model.state_dict(),'E:/MSBERT_model/1012two_stage/mask.pkl')
     
-    train_ref_arr =  model_embed(model,train_ref,batch_size)
-    train_query_arr = model_embed(model,train_query,batch_size)
-    top = search_top(train_ref_arr,train_query_arr,smiles1,smiles2,batch=50)
+    top = CalMSBERTTop(model,train_ref,train_query,smiles1,smiles2)
     
-    test_ref_arr = model_embed(model,test_ref,batch_size)
-    test_query_arr = model_embed(model,test_query,batch_size)
-    dataset_arr = np.vstack((train_ref_arr,test_ref_arr))
+    ref_list = train_ref+test_ref
     smiles_list = smiles1+smiles3
-    top2 = search_top(dataset_arr,test_query_arr,smiles_list,smiles4,batch=50)
+    top2 = CalMSBERTTop(model,ref_list,test_query,smiles_list,smiles4)
+    
+    with open('GNPSdata/qtof.pickle', 'rb') as f:
+        qtof = pickle.load(f)
+    ref_data,query_data,smile_ref,smile_query = ParseOtherData(qtof)
+    MSBERTQtofTop = bertonother(MSBERTModel,ref_data,query_data,smile_ref,smile_query)
     
     
     
