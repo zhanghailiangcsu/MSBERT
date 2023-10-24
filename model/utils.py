@@ -9,6 +9,7 @@ from model.MSBERTModel import MyDataSet
 import torch.utils.data as Data
 from tqdm import tqdm
 import numpy as np
+import matplotlib.pyplot as plt
 
 def model_embed(model,test_data,batch_size):
     input_ids, intensity = zip(*test_data)
@@ -62,4 +63,11 @@ def search_top(dataset_arr,query_arr,dataset_smiles,query_smiles,batch):
     top10 = len(top10)/len(query_smiles)
     return [top1,top5,top10]
 
+def plot_step_loss(train_loss,step=100):
+    all_loss = [p for i in train_loss for p in i]
+    step_loss = [all_loss[i:i+step] for i in range(0,len(all_loss),step)]
+    step_loss = [np.nanmean(i) for i in step_loss]
+    plt.plot(step_loss)
+    plt.xlabel('Steps')
+    plt.ylabel('Loss')
 
