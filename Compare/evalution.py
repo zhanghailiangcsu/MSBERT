@@ -31,7 +31,6 @@ from spec2vec import Spec2Vec
 from spec2vec.model_building import train_new_word2vec_model
 
 
-
 def JaccardScore(fp1,fp2):
     u_or_v = np.bitwise_or(fp1 != 0, fp2 != 0)
     u_and_v = np.bitwise_and(fp1 != 0, fp2 != 0)
@@ -148,7 +147,6 @@ def RandomSelect(train_ref,model,number=5):
     spec_pca2 = [i for s in spec_pca for i in s]
     pca = PCA(n_components=number)
     tsne = TSNE(n_components=2)
-    umap_ = umap.UMAP()
     
     #原始的msms降维
     spec_vec = []
@@ -273,12 +271,6 @@ def CossimOnOther(qtof_ref,qtof_query):
     smile_query = [i[0] for i in qtof_query]
     consinetop = search_top(qtof_ref_peak,qtof_query_peak,smile_ref,smile_query,batch=50)
     return consinetop
-
-def MSBERT_orbitrap_Embed(MSBERTModel,train_ref):
-    train_ref_list = model_embed(MSBERTModel,train_ref,64)
-    train_ref_arr = np.concatenate(train_ref_list)
-    train_ref_arr = train_ref_arr.reshape(train_ref_arr.shape[0],train_ref_arr.shape[2])
-    return train_ref_arr
 
 def Parse_orbitrap(file):
     with open(file, 'rb') as f:
@@ -421,12 +413,12 @@ if __name__ == '__main__':
     test_query,word2idx = make_train_data(msms4,precursor4,100)
     
 
-    train_ref_arr = MSBERT_orbitrap_Embed(MSBERTModel,train_ref)
-    train_query_arr = MSBERT_orbitrap_Embed(MSBERTModel,train_query)
+    train_ref_arr = model_embed(MSBERTModel,train_ref)
+    train_query_arr = model_embed(MSBERTModel,train_query)
     top = search_top(train_ref_arr,train_query_arr,smiles1,smiles2,batch=50)
     
-    test_ref_arr = MSBERT_orbitrap_Embed(MSBERTModel,test_ref)
-    test_query_arr = MSBERT_orbitrap_Embed(MSBERTModel,test_query)
+    test_ref_arr = model_embed(MSBERTModel,test_ref)
+    test_query_arr = model_embed(MSBERTModel,test_query)
     dataset_arr = np.vstack((train_ref_arr,test_ref_arr))
     smiles_list = smiles1+smiles3
     top2 = search_top(dataset_arr,test_query_arr,smiles_list,smiles4,batch=50)
