@@ -13,8 +13,11 @@ import torch
 from model.MSBERTModel import MSBERT
 from model.Train import  TrainMSBERT
 from model.utils import ModelEmbed,SearchTop,ParseOrbitrap,CalMSBERTTop
-from model.utils import ParseOtherData
+from model.utils import ParseOtherData,CalCosineTop
 import numpy as np
+from Spec2VecModel.TrainSpec2Vec import CalSpec2VecTop
+import gensim
+from data.LoadGNPS import pro_dataset,make_dataset
 
 
 if __name__ == '__main__':
@@ -45,25 +48,42 @@ if __name__ == '__main__':
     input_ids, intensity = zip(*train_data) 
     intensity = [torch.FloatTensor(i) for i in intensity] 
     
-    model = MSBERT(vocab_size, hidden, n_layers, attn_heads, dropout,maxlen,max_pred)
-    model,train_loss,val_loss = TrainMSBERT(model,input_ids,intensity,batch_size,epochs,lr,temperature)
-    torch.save(model.state_dict(),'E:/MSBERT_model/1012two_stage/mask.pkl')
+    MSBERTmodel = MSBERT(vocab_size, hidden, n_layers, attn_heads, dropout,maxlen,max_pred)
+    MSBERTmodel,train_loss,val_loss = TrainMSBERT(MSBERTmodel,input_ids,intensity,batch_size,epochs,lr,temperature)
+    torch.save(MSBERTmodel.state_dict(),'E:/MSBERT_model/1012two_stage/mask.pkl')
     
-    top = CalMSBERTTop(model,train_ref,train_query,smiles1,smiles2)
+    top = CalMSBERTTop(MSBERTmodel,train_ref,train_query,smiles1,smiles2)
     
     ref_list = train_ref+test_ref
     smiles_list = smiles1+smiles3
-    top2 = CalMSBERTTop(model,ref_list,test_query,smiles_list,smiles4)
+    top2 = CalMSBERTTop(MSBERTmodel,ref_list,test_query,smiles_list,smiles4)
+    
+    model_file = 'Spec2vecModel/ob_all.model'
+    Spec2VecModel = gensim.models.Word2Vec.load(model_file)
+    Spec2VecObTop1 = CalSpec2VecTop(Spec2VecModel,train_ref,train_query)
+    CosineObTop1 = CalCosineTop(train_ref,train_query)
+    ref_list = train_ref+test_ref
+    Spec2VecObTop2 = CalSpec2VecTop(Spec2VecModel,ref_list,test_query)
+    CosineObTop2 = CalCosineTop(ref_list,test_query)
     
     with open('GNPSdata/qtof.pickle', 'rb') as f:
         qtof = pickle.load(f)
     ref_data,query_data,smile_ref,smile_query = ParseOtherData(qtof)
-    MSBERTQtofTop = CalMSBERTTop(model,ref_data,query_data,smile_ref,smile_query)
+    MSBERTQtofTop = CalMSBERTTop(MSBERTmodel,ref_data,query_data,smile_ref,smile_query)
+    qtof_ref,qtof_query,_,_ = make_dataset(qtof,n_max=99,test_size=0,n_decimals=2)
+    Spec2VecQtofTop = CalSpec2VecTop(Spec2VecModel,qtof_ref,qtof_query)
+    CosineTop = CalCosineTop(qtof_ref,qtof_query)
     
     with open('GNPSdata/other.pickle', 'rb') as f:
         other = pickle.load(f)
     ref_data,query_data,smile_ref,smile_query = ParseOtherData(other)
-    MSBERTOtherTop = CalMSBERTTop(model,ref_data,query_data,smile_ref,smile_query)
+    MSBERTOtherTop = CalMSBERTTop(MSBERTmodel,ref_data,query_data,smile_ref,smile_query)
+    other_ref,other_query,_,_ = make_dataset(other,n_max=99,test_size=0,n_decimals=2)
+    Spec2VecOtherTop = CalSpec2VecTop(Spec2VecModel,other_ref,other_query)
+    CosineTop = CalCosineTop(other_ref,other_query)
+    
+    
+   
     
     
 
