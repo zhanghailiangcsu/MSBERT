@@ -23,9 +23,8 @@ class MyDataSet(Data.Dataset):
         return self.input_ids[idx], self.intensity[idx]
 
 class Mask(nn.Module):
-    def __init__(self,ratio,max_pred):
+    def __init__(self,max_pred):
         super(Mask , self).__init__()
-        self.ratio = ratio
         self.max_pred = max_pred
     
     def forward(self,x,intensity_):
@@ -182,21 +181,18 @@ def get_attn_pad_mask(x):
 
 class MSBERT(nn.Module):
 
-    def __init__(self, vocab_size, hidden, n_layers, attn_heads, dropout,max_len,
-                 ratio,max_pred):
+    def __init__(self, vocab_size, hidden, n_layers, attn_heads, dropout,max_len,max_pred):
 
         super().__init__()
         self.hidden = hidden
         self.n_layers = n_layers
         self.attn_heads = attn_heads
-
         self.feed_forward_hidden = hidden * 4
-
         self.embedding = BERTEmbedding(vocab_size=vocab_size, embed_size=hidden,dropout=dropout,max_len=max_len)
 
         self.transformer_blocks = nn.ModuleList(
             [TransformerBlock(hidden, attn_heads, hidden * 4, dropout) for _ in range(n_layers)])
-        self.mask = Mask(ratio,max_pred)
+        self.mask = Mask(max_pred)
         self.fc2 = nn.Linear(hidden, vocab_size, bias=False)
         self.activ2 = nn.GELU()
         self.linear = nn.Linear(hidden, hidden)
@@ -263,24 +259,4 @@ class MSBERT(nn.Module):
         pool = torch.matmul(intensity,output)
         pool = pool/intensity.shape[1]  
         return pool
-
-
-
-
-
-
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
 
