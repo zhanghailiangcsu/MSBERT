@@ -7,8 +7,8 @@ Created on Tue Oct 24 09:04:35 2023
 import os
 os.chdir('E:/github/MSBERT')
 import pickle
-from data.LoadGNPS import pro_dataset
-from data.ProcessData import make_train_data,make_test_data
+from data.LoadGNPS import ProDataset,MakeDataset
+from data.ProcessData import MakeTrainData,MakeTestData
 import torch
 from model.MSBERTModel import MSBERT
 from model.Train import  TrainMSBERT
@@ -17,7 +17,6 @@ from model.utils import ParseOtherData,CalCosineTop
 import numpy as np
 from Spec2VecModel.TrainSpec2Vec import CalSpec2VecTop
 import gensim
-from data.LoadGNPS import pro_dataset,make_dataset
 
 
 if __name__ == '__main__':
@@ -38,11 +37,11 @@ if __name__ == '__main__':
     test_ref,msms3,precursor3,smiles3 = ParseOrbitrap('GNPSdata/ob_test_ref.pickle')
     test_query,msms4,precursor4,smiles4 = ParseOrbitrap('GNPSdata/ob_test_query.pickle')
     
-    train_ref,word2idx = make_train_data(msms1,precursor1,100)
-    train_query,word2idx = make_train_data(msms2,precursor2,100)
-    test_ref,word2idx = make_train_data(msms3,precursor3,100)
-    test_query,word2idx = make_train_data(msms4,precursor4,100)
-    train_data,word2idx = make_train_data(msms1,precursor1,maxlen)
+    train_ref,word2idx = MakeTrainData(msms1,precursor1,100)
+    train_query,word2idx = MakeTrainData(msms2,precursor2,100)
+    test_ref,word2idx = MakeTrainData(msms3,precursor3,100)
+    test_query,word2idx = MakeTrainData(msms4,precursor4,100)
+    train_data,word2idx = MakeTrainData(msms1,precursor1,maxlen)
     
     vocab_size = len(word2idx)
     input_ids, intensity = zip(*train_data) 
@@ -70,7 +69,7 @@ if __name__ == '__main__':
         qtof = pickle.load(f)
     ref_data,query_data,smile_ref,smile_query = ParseOtherData(qtof)
     MSBERTQtofTop = CalMSBERTTop(MSBERTmodel,ref_data,query_data,smile_ref,smile_query)
-    qtof_ref,qtof_query,_,_ = make_dataset(qtof,n_max=99,test_size=0,n_decimals=2)
+    qtof_ref,qtof_query,_,_ = MakeDataset(qtof,n_max=99,test_size=0,n_decimals=2)
     Spec2VecQtofTop = CalSpec2VecTop(Spec2VecModel,qtof_ref,qtof_query)
     CosineTop = CalCosineTop(qtof_ref,qtof_query)
     
@@ -78,7 +77,7 @@ if __name__ == '__main__':
         other = pickle.load(f)
     ref_data,query_data,smile_ref,smile_query = ParseOtherData(other)
     MSBERTOtherTop = CalMSBERTTop(MSBERTmodel,ref_data,query_data,smile_ref,smile_query)
-    other_ref,other_query,_,_ = make_dataset(other,n_max=99,test_size=0,n_decimals=2)
+    other_ref,other_query,_,_ = MakeDataset(other,n_max=99,test_size=0,n_decimals=2)
     Spec2VecOtherTop = CalSpec2VecTop(Spec2VecModel,other_ref,other_query)
     CosineTop = CalCosineTop(other_ref,other_query)
     
