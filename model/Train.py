@@ -4,34 +4,16 @@ Created on Wed Mar 29 10:45:34 2023
 
 @author: Administrator
 """
-import os
-os.chdir('E:/github/MSBERT')
 import numpy as np
-from model.MSBERTModel import BERT,MyDataSet
-from LoadHMDB import LoadCFMHMDB
-from process_data import make_train_data,ms_word,make_test_data
+from model.MSBERTModel import MyDataSet
 import torch.utils.data as Data
 import torch
 import torch.optim as optim
 import torch.nn as nn
-from tqdm import tqdm
-import matplotlib.pyplot as plt
-import pickle
 from info_nce import InfoNCE
 from timm.scheduler import CosineLRScheduler
+from model.utils import dataset_sep
 
-def dataset_sep(input_ids,intensity,val_size = 0.1):
-    n = len(intensity)
-    perm = np.random.permutation(n)
-    n_train = int(n*(1-val_size))
-    perm_train = perm[0:n_train]
-    perm_val = perm[n_train:]
-    input_ids_train = [input_ids[x] for x in perm_train] 
-    input_ids_val = [input_ids[x] for x in perm_val] 
-    intensity_train = [intensity[x] for x in perm_train]
-    intensity_val = [intensity[x] for x in perm_val]
-    return input_ids_train,intensity_train,input_ids_val,intensity_val
-#chongxie 
 def TrainMask(model,input_ids,intensity,batch_size,epochs,lr):
     
     input_ids_train,intensity_train,input_ids_val,intensity_val = dataset_sep(input_ids,intensity,val_size = 0.1)
