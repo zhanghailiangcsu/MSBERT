@@ -202,7 +202,7 @@ def get_attn_pad_mask(x):
     atten_mask = torch.add(atten_mask1,atten_mask2)
     return atten_mask
 
-class BERT(nn.Module):
+class MSBERT(nn.Module):
 
     def __init__(self, vocab_size, hidden, n_layers, attn_heads, dropout,max_len,
                  ratio,max_pred):
