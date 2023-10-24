@@ -343,19 +343,7 @@ if __name__ == '__main__':
     
     
     
-    qtof_ref,qtof_query,_,_ = make_dataset(qtof,n_max=99,test_size=0,n_decimals=2)
-    ref_documents,ref_spectrums = gen_reference_documents(qtof_ref,n_decimals=2)
-    query_documents,query_spectrums = gen_reference_documents(qtof_query,n_decimals=2)
     
-    
-    spec2vec_similarity = Spec2Vec(model=spec2vecmodel, intensity_weighting_power=0.5,
-                               allowed_missing_percentage=5.0)
-    qtof_ref = pro_dataset(qtof_ref,2,99)
-    qtof_query = pro_dataset(qtof_query,2,99)
-    smiles1 = [i[0] for i in qtof_ref]
-    smiles2 = [i[0] for i in qtof_query]
-    Spec2VecQtofTop = cal_spec2vec_top(ref_documents, query_spectrums,
-                  spec2vec_similarity,smiles1,smiles2,batch=1000)
     
     qtof_ref,qtof_query,_,_ = make_dataset(qtof,n_max=99,test_size=0,n_decimals=2)
     ConsineTop = CossimOnOther(qtof_ref,qtof_query)
