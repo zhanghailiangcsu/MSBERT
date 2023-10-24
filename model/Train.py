@@ -61,7 +61,6 @@ def TrainMask(model,input_ids,intensity,batch_size,epochs,lr):
                 val_step_loss.append(loss.item())
             val_loss.append(val_step_loss)
             print(str(epoch)+'epoch val_loss'+str(np.nanmean(val_step_loss)))
-    # torch.save(model.state_dict(),'E:/MSBERT_model/1012two_stage/mask.pkl')
     return model,train_loss,val_loss
 
 def TrainComparative(model,input_ids,intensity,batch_size,epochs,lr,temperature = 0.01):
