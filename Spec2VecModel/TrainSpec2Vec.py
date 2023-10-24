@@ -15,10 +15,10 @@ from spec2vec import SpectrumDocument,Document
 from spec2vec.model_building import train_new_word2vec_model
 import matplotlib.pyplot as plt
 import gensim
-from spec2vec_model.spec2wordvector import spec_to_wordvector
+from Spec2VecModel.spec2wordvector import spec_to_wordvector
 from spec2vec import Spec2Vec
 from matchms import calculate_scores
-from LoadGNPS import pro_dataset
+from data.LoadGNPS import pro_dataset
 
 def gen_reference_documents(msms,n_decimals=2):
     msms2 = [i for s in msms for i in s]
@@ -83,9 +83,9 @@ def CalSpec2VecTop(Spec2vecModel,other_ref,other_query):
     other_query = pro_dataset(other_query,2,99)
     smiles1 = [i[0] for i in other_ref]
     smiles2 = [i[0] for i in other_query]
-    Spec2VecQOtherTop = cal_spec2vec_top(ref_documents, query_spectrums,
+    Spec2VecOtherTop = cal_spec2vec_top(ref_documents, query_spectrums,
                   spec2vec_similarity,smiles1,smiles2,batch=1000)
-    return Spec2VecQOtherTop
+    return Spec2VecOtherTop
 
 if __name__ == '__main__':
     
@@ -132,40 +132,6 @@ if __name__ == '__main__':
     
     spec2vec_top = cal_spec2vec_top(reference_documents, query_spectrums,
                   spec2vec_similarity,smiles1,smiles2,batch=1000)
-    
-    
-    
-    
-    
-    # all_msms = peak_embed(model_file,spectrums,n_decimals=2)
-    # train_ref_embed = all_msms[0:len(train_ref)]
-    # train_query_embed = all_msms[len(train_ref):len(train_ref)+len(train_query)]
-    # test_ref_embed = all_msms[len(train_ref)+len(train_query):len(train_ref)+len(train_query)+len(test_ref)]
-    # test_query_embed = all_msms[len(train_ref)+len(train_query)+len(test_ref):]
-    # train_ref_embed = np.array(train_ref_embed)
-    # train_query_embed = np.array(train_query_embed)
-    # test_ref_embed = np.array(test_ref_embed)
-    # test_query_embed = np.array(test_query_embed)
-    # top = search_top(train_ref_embed,train_query_embed,smiles1,smiles2,batch=50)
-    
-    # dataset_arr = np.vstack((train_ref_embed,test_ref_embed))
-    # dataset_smiles = smiles1+smiles3
-    # top2 = search_top(dataset_arr,test_query_embed,dataset_smiles,smiles4,batch=50)
-    
-    
-    
-    #在不同的数据上训练的代码放在这里得了，训练好了以后测试放在别的脚本
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     
