@@ -7,14 +7,13 @@ Created on Wed Sep 27 09:02:19 2023
 import optuna
 from model.MSBERTModel import MSBERT,MyDataSet
 import torch.optim as optim
-from Compare.evalution import MSBERT_orbitrap_Embed,Parse_orbitrap
+from model.utils import ParseOrbitrap,ModelEmbed,SearchTop
 import torch.nn as nn
 import torch
 from info_nce import InfoNCE
 import torch.utils.data as Data
 from timm.scheduler import CosineLRScheduler
-from LoadGNPS import make_train_data
-from model.utils import search_top
+from data.LoadGNPS import MakeTrainData
 
 def objective(trial):
     '''
@@ -56,19 +55,19 @@ def objective(trial):
             step_count += 1 
     model.eval()
     with torch.no_grad():
-        train_ref_arr = MSBERT_orbitrap_Embed(model,train_ref)
-        train_query_arr = MSBERT_orbitrap_Embed(model,train_query)
-        top = search_top(train_ref_arr,train_query_arr,smiles1,smiles2,batch=50)
+        train_ref_arr = ModelEmbed(model,train_ref,batch_size)
+        train_query_arr = ModelEmbed(model,train_query,batch_size)
+        top = SearchTop(train_ref_arr,train_query_arr,smiles1,smiles2,batch=50)
         top1 = top[0]
     return top1
 
 
 
 if __name__ == '__main__':
-    train_ref,msms1,precursor1,smiles1 = Parse_orbitrap('GNPSdata/ob_train_ref.pickle')
-    train_query,msms2,precursor2,smiles2 = Parse_orbitrap('GNPSdata/ob_train_query.pickle')
-    train_ref,word2idx = make_train_data(msms1,precursor1,100)
-    train_query,word2idx = make_train_data(msms2,precursor2,100)
+    train_ref,msms1,precursor1,smiles1 = ParseOrbitrap('GNPSdata/ob_train_ref.pickle')
+    train_query,msms2,precursor2,smiles2 = ParseOrbitrap('GNPSdata/ob_train_query.pickle')
+    train_ref,word2idx = MakeTrainData(msms1,precursor1,100)
+    train_query,word2idx = MakeTrainData(msms2,precursor2,100)
     vocab_size = len(word2idx)
     input_ids, intensity = zip(*train_ref) 
     intensity = [torch.FloatTensor(i) for i in intensity] 
