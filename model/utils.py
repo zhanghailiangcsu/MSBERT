@@ -11,7 +11,8 @@ from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
-from data.LoadGNPS import pro_dataset
+from data.LoadGNPS import pro_dataset,make_dataset
+from data.ProcessData import make_test_data,make_train_data
 
 def ParseOrbitrap(file):
     with open(file, 'rb') as f:
@@ -27,6 +28,20 @@ def CalMSBERTTop(MSBERTModel,ref_data,query_data,smile_ref,smile_query):
     query_arr = ModelEmbed(MSBERTModel,query_data,64)
     top = SearchTop(ref_arr,query_arr,smile_ref,smile_query,batch=50)
     return top
+
+def ParseOtherData(other):
+    other_ref,other_query,_,_ = make_dataset(other,n_max=99,test_size=0,n_decimals=2)
+    other_ref = pro_dataset(other_ref,2,99)
+    other_query = pro_dataset(other_query,2,99)
+    msms_ref = [i[2] for i in other_ref]
+    msms_query = [i[2] for i in other_query]
+    smile_ref = [i[0] for i in other_ref]
+    smile_query = [i[0] for i in other_query]
+    precursor_ref = [i[1] for i in other_ref]
+    precursor_query = [i[1] for i in other_query]
+    ref_data,word2idx = make_train_data(msms_ref,precursor_ref,100)
+    query_data,word2idx = make_train_data(msms_query,precursor_query,100)
+    return ref_data,query_data,smile_ref,smile_query
 
 def DatasetSep(input_ids,intensity,val_size = 0.1):
     n = len(intensity)
