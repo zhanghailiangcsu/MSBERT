@@ -11,8 +11,8 @@ from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
 import pickle
-from data.LoadGNPS import pro_dataset,make_dataset
-from data.ProcessData import make_test_data,make_train_data
+from data.LoadGNPS import ProDataset,MakeDataset
+from data.ProcessData import MakeTestData,MakeTrainData
 from data.MS2Vec import ms_to_vec
 
 def CalCosineTop(qtof_ref,qtof_query):
@@ -25,8 +25,8 @@ def CalCosineTop(qtof_ref,qtof_query):
     qtof_ref_peak = np.array(qtof_ref_peak)
     qtof_query_peak = [m.transform(i) for i in qtof_query_peak]
     qtof_query_peak = np.array(qtof_query_peak)
-    qtof_ref = pro_dataset(qtof_ref,2,99)
-    qtof_query = pro_dataset(qtof_query,2,99)
+    qtof_ref = ProDataset(qtof_ref,2,99)
+    qtof_query = ProDataset(qtof_query,2,99)
     smile_ref = [i[0] for i in qtof_ref]
     smile_query = [i[0] for i in qtof_query]
     cosinetop = SearchTop(qtof_ref_peak,qtof_query_peak,smile_ref,smile_query,batch=50)
@@ -35,7 +35,7 @@ def CalCosineTop(qtof_ref,qtof_query):
 def ParseOrbitrap(file):
     with open(file, 'rb') as f:
         train_ref = pickle.load(f)
-    ref = pro_dataset(train_ref,2,99)
+    ref = ProDataset(train_ref,2,99)
     msms = [i[2] for i in ref]
     precursor = [i[1] for i in ref]
     smiles = [i[0] for i in ref]
@@ -48,17 +48,17 @@ def CalMSBERTTop(MSBERTModel,ref_data,query_data,smile_ref,smile_query):
     return top
 
 def ParseOtherData(other):
-    other_ref,other_query,_,_ = make_dataset(other,n_max=99,test_size=0,n_decimals=2)
-    other_ref = pro_dataset(other_ref,2,99)
-    other_query = pro_dataset(other_query,2,99)
+    other_ref,other_query,_,_ = MakeDataset(other,n_max=99,test_size=0,n_decimals=2)
+    other_ref = ProDataset(other_ref,2,99)
+    other_query = ProDataset(other_query,2,99)
     msms_ref = [i[2] for i in other_ref]
     msms_query = [i[2] for i in other_query]
     smile_ref = [i[0] for i in other_ref]
     smile_query = [i[0] for i in other_query]
     precursor_ref = [i[1] for i in other_ref]
     precursor_query = [i[1] for i in other_query]
-    ref_data,word2idx = make_train_data(msms_ref,precursor_ref,100)
-    query_data,word2idx = make_train_data(msms_query,precursor_query,100)
+    ref_data,word2idx = MakeTrainData(msms_ref,precursor_ref,100)
+    query_data,word2idx = MakeTrainData(msms_query,precursor_query,100)
     return ref_data,query_data,smile_ref,smile_query
 
 def DatasetSep(input_ids,intensity,val_size = 0.1):
