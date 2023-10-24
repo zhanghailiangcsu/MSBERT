@@ -12,11 +12,11 @@ import torch.optim as optim
 import torch.nn as nn
 from info_nce import InfoNCE
 from timm.scheduler import CosineLRScheduler
-from model.utils import dataset_sep
+from model.utils import DatasetSep
 
 def TrainMask(model,input_ids,intensity,batch_size,epochs,lr):
     
-    input_ids_train,intensity_train,input_ids_val,intensity_val = dataset_sep(input_ids,intensity,val_size = 0.1)
+    input_ids_train,intensity_train,input_ids_val,intensity_val = DatasetSep(input_ids,intensity,val_size = 0.1)
     dataset = MyDataSet(input_ids_train,intensity_train)
     dataloader = Data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     dataset_val = MyDataSet(input_ids_val,intensity_val)
@@ -64,7 +64,7 @@ def TrainMask(model,input_ids,intensity,batch_size,epochs,lr):
     return model,train_loss,val_loss
 
 def TrainComparative(model,input_ids,intensity,batch_size,epochs,lr,temperature = 0.01):
-    input_ids_train,intensity_train,input_ids_val,intensity_val = dataset_sep(input_ids,intensity,val_size = 0.1)
+    input_ids_train,intensity_train,input_ids_val,intensity_val = DatasetSep(input_ids,intensity,val_size = 0.1)
     dataset = MyDataSet(input_ids_train,intensity_train)
     dataloader = Data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     dataset_val = MyDataSet(input_ids_val,intensity_val)
@@ -113,7 +113,7 @@ def TrainComparative(model,input_ids,intensity,batch_size,epochs,lr,temperature 
 
 def TrainMSBERT(model,input_ids,intensity,batch_size,epochs,lr,temperature = 0.01):
     
-    input_ids_train,intensity_train,input_ids_val,intensity_val = dataset_sep(input_ids,intensity,val_size = 0.1)
+    input_ids_train,intensity_train,input_ids_val,intensity_val = DatasetSep(input_ids,intensity,val_size = 0.1)
     dataset = MyDataSet(input_ids_train,intensity_train)
     dataloader = Data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     dataset_val = MyDataSet(input_ids_val,intensity_val)
