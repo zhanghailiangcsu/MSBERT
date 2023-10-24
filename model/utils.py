@@ -13,6 +13,24 @@ import matplotlib.pyplot as plt
 import pickle
 from data.LoadGNPS import pro_dataset,make_dataset
 from data.ProcessData import make_test_data,make_train_data
+from data.MS2Vec import ms_to_vec
+
+def CalCosineTop(qtof_ref,qtof_query):
+    qtof_ref_ = [i for s in qtof_ref for i in s]
+    qtof_query_ = [i for s in qtof_query for i in s]
+    qtof_ref_peak = [s.peaks.to_numpy for s in qtof_ref_]
+    qtof_query_peak = [s.peaks.to_numpy for s in qtof_query_]
+    m = ms_to_vec()
+    qtof_ref_peak = [m.transform(i) for i in qtof_ref_peak]
+    qtof_ref_peak = np.array(qtof_ref_peak)
+    qtof_query_peak = [m.transform(i) for i in qtof_query_peak]
+    qtof_query_peak = np.array(qtof_query_peak)
+    qtof_ref = pro_dataset(qtof_ref,2,99)
+    qtof_query = pro_dataset(qtof_query,2,99)
+    smile_ref = [i[0] for i in qtof_ref]
+    smile_query = [i[0] for i in qtof_query]
+    cosinetop = SearchTop(qtof_ref_peak,qtof_query_peak,smile_ref,smile_query,batch=50)
+    return cosinetop
 
 def ParseOrbitrap(file):
     with open(file, 'rb') as f:
