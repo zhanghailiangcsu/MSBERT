@@ -22,6 +22,12 @@ def ParseOrbitrap(file):
     smiles = [i[0] for i in ref]
     return train_ref,msms,precursor,smiles
 
+def CalMSBERTTop(MSBERTModel,ref_data,query_data,smile_ref,smile_query):
+    ref_arr = ModelEmbed(MSBERTModel,ref_data,64)
+    query_arr = ModelEmbed(MSBERTModel,query_data,64)
+    top = SearchTop(ref_arr,query_arr,smile_ref,smile_query,batch=50)
+    return top
+
 def DatasetSep(input_ids,intensity,val_size = 0.1):
     n = len(intensity)
     perm = np.random.permutation(n)
