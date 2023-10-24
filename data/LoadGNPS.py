@@ -119,8 +119,6 @@ def InstrumentFilter(spectrums_pos_annotated):
     return orbitrap,qtof,other
 
 def make_dataset(spectrums_pos_annotated,n_max=100,test_size=0.2,n_decimals=2):
-    #首先是把smile和谱对应起来，保证训练集和测试集中没有重复的化合物，
-    # 然后重复谱中随机取一个作为query
     smiles_unique = []
     train_ref = []
     train_query = []
@@ -172,7 +170,7 @@ def pro_dataset(data,n_decimals,n_max):
         smile = spec.get('smiles')
         precursor = spec.metadata['precursor_mz']
         mz = peaks[:,0]
-        mz = ['peak@'+str(round(i,n_decimals)) for i in mz]
+        mz = [str(round(i,n_decimals)) for i in mz]
         inten = peaks[:,1]
         info = []
         info.append(smile)
@@ -215,14 +213,7 @@ if __name__ == '__main__':
     spectrums_filetr = PrecursorFilter(spectrums_pos_annotated)
     orbitrap,qtof,other = InstrumentFilter(spectrums_filetr)
     
-    train_ref,train_query,test_ref,test_query =  make_dataset(spectrums_filetr,n_max=99,test_size=0.2,n_decimals=2)
-    pickle.dump(train_ref, open('GNPSdata/train_refp.pickle','wb'))
-    pickle.dump(train_query, open('GNPSdata/train_queryp.pickle','wb'))
-    pickle.dump(test_ref, open('GNPSdata/test_refp.pickle','wb'))
-    pickle.dump(test_query, open('GNPSdata/test_queryp.pickle','wb'))
-    
-    
-    #按照仪器类型分类存储
+    #Save by instrument type
     ob_train_ref,ob_train_query,ob_test_ref,ob_test_query =  make_dataset(orbitrap,n_max=99,test_size=0.2,n_decimals=2)
     pickle.dump(ob_train_ref, open('GNPSdata/ob_train_ref.pickle','wb'))
     pickle.dump(ob_train_query, open('GNPSdata/ob_train_query.pickle','wb'))
