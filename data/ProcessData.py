@@ -7,6 +7,9 @@ Created on Wed Mar 29 08:50:48 2023
 import numpy as np
 
 def MakeTestData(sentences,precursor,word2idx,maxlen):
+    '''
+    Build train test set
+    '''
     intensity = [i[1] for i in sentences]
     intensity = [np.hstack((2,i)) for i in intensity]
     peaks = [i[0] for i in sentences]
@@ -30,6 +33,9 @@ def MakeTestData(sentences,precursor,word2idx,maxlen):
     return test_data
 
 def MakeTrainData(sentences,precursor,maxlen):
+    '''
+    Build train data set
+    '''
     intensity = [i[1] for i in sentences]
     intensity = [np.hstack((2,i)) for i in intensity]
     peaks = [i[0] for i in sentences]
