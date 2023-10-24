@@ -18,7 +18,8 @@ import gensim
 from Spec2VecModel.spec2wordvector import spec_to_wordvector
 from spec2vec import Spec2Vec
 from matchms import calculate_scores
-from data.LoadGNPS import pro_dataset
+from data.LoadGNPS import ProDataset
+from model.utils import  ParseOrbitrap
 
 def gen_reference_documents(msms,n_decimals=2):
     msms2 = [i for s in msms for i in s]
@@ -79,8 +80,8 @@ def CalSpec2VecTop(Spec2vecModel,other_ref,other_query):
     query_documents,query_spectrums = gen_reference_documents(other_query,n_decimals=2)
     spec2vec_similarity = Spec2Vec(model=Spec2vecModel, intensity_weighting_power=0.5,
                                allowed_missing_percentage=20)
-    other_ref = pro_dataset(other_ref,2,99)
-    other_query = pro_dataset(other_query,2,99)
+    other_ref = ProDataset(other_ref,2,99)
+    other_query = ProDataset(other_query,2,99)
     smiles1 = [i[0] for i in other_ref]
     smiles2 = [i[0] for i in other_query]
     Spec2VecOtherTop = cal_spec2vec_top(ref_documents, query_spectrums,
@@ -89,38 +90,17 @@ def CalSpec2VecTop(Spec2vecModel,other_ref,other_query):
 
 if __name__ == '__main__':
     
-    with open('GNPSdata/ob_train_ref.pickle', 'rb') as f:
-        train_ref = pickle.load(f)
-    train_ref = pro_dataset(train_ref,2,99)
-    with open('GNPSdata/ob_train_query.pickle', 'rb') as f:
-        train_query = pickle.load(f)
-    train_query = pro_dataset(train_query,2,99)
-    with open('GNPSdata/ob_test_ref.pickle', 'rb') as f:
-        test_ref = pickle.load(f)
-    test_ref = pro_dataset(test_ref,2,99)
-    with open('GNPSdata/ob_test_query.pickle', 'rb') as f:
-        test_query = pickle.load(f)
-    test_query = pro_dataset(test_query,2,99)
+    train_ref,msms1,precursor1,smiles1 = ParseOrbitrap('GNPSdata/ob_train_ref.pickle')
+    train_query,msms2,precursor2,smiles2 =ParseOrbitrap('GNPSdata/ob_train_query.pickle')
+    test_ref,msms3,precursor3,smiles3 = ParseOrbitrap('GNPSdata/ob_test_ref.pickle')
+    test_query,msms4,precursor4,smiles4 = ParseOrbitrap('GNPSdata/ob_test_query.pickle')
     
-    msms1 = [i[2] for i in train_ref]
-    msms2 = [i[2] for i in train_query]
-    msms3 = [i[2] for i in test_ref]
-    msms4 = [i[2] for i in test_query]
-    msms1 = parse_msms(msms1)
-    msms2 = parse_msms(msms2)
-    msms3 = parse_msms(msms3)
-    msms4 = parse_msms(msms4)
-    smiles1 = [i[0] for i in train_ref]
-    smiles2 = [i[0] for i in train_query]
-    smiles3 = [i[0] for i in test_ref]
-    smiles4 = [i[0] for i in test_query]
     msms = msms1+msms2+msms3+msms4
     
     reference_documents,spectrums = gen_reference_documents(train_ref,n_decimals=2)
     
     
     model_file = "spec2vec_model/ob_spec2vec.model"
-    model_file = 'spec2vec_model/ob_spec2vec_iter_20.model'
     # model = gensim.models.Word2Vec.load(model_file)
     model = train_new_word2vec_model(reference_documents, iterations=[10,20,30,40], 
                                       filename=model_file,vector_size=512,
