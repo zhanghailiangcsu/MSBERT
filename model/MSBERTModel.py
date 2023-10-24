@@ -35,21 +35,6 @@ class Mask(nn.Module):
         mask_pos_list = []
         for p in range(x.shape[0]):
             pos_p = torch.argsort(intensity_[p,:],descending=True)
-            
-            # sum_intensity = torch.sum(intensity_[p,:])
-            # inten_p = torch.sort(intensity_[p,:],descending=True)[0]
-            # inten_accum = torch.cumsum(inten_p,dim=0)
-            # inten_bool = inten_accum < 0.9*sum_intensity
-            # number = torch.sum(inten_bool)
-            # if number <= 5:
-            #     number = 5
-            # nb.append(torch.tensor(number))
-            # len_mask = int(number*self.ratio)
-            # if len_mask < 1:
-            #     len_mask = 1
-            # if len_mask > self.max_pred:
-            #     len_mask = self.max_pred
-           
             len_mask = 2
             mask_pos = pos_p[torch.randperm(5)[0:len_mask]].to(device)
             mask_bool = torch.rand(x.shape[1]) > 1
