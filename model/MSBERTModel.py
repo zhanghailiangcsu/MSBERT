@@ -9,14 +9,7 @@ import torch
 import math
 import torch.nn.functional as F
 import torch.utils.data as Data
-import pickle
-import numpy as np
-from process_data import make_train_data,make_test_data
-import matplotlib.pyplot as plt
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-from LoadGNPS import pro_dataset
-
-
 
 class MyDataSet(Data.Dataset):
     def __init__(self, input_ids, intensity):
@@ -287,128 +280,10 @@ class MSBERT(nn.Module):
         return pool
 
 
-def plot_step_loss(train_loss,step=100):
-    all_loss = [p for i in train_loss for p in i]
-    step_loss = [all_loss[i:i+step] for i in range(0,len(all_loss),step)]
-    step_loss = [np.nanmean(i) for i in step_loss]
-    plt.plot(step_loss)
-    plt.xlabel('Steps')
-    plt.ylabel('Loss')
-
-
-
-if __name__ == '__main__':
-    
-    maxlen = 100
-    batch_size = 32
-    dropout = 0
-    hidden=512
-    n_layers = 6
-    attn_heads = 16
-    ratio = 0.2
-    max_pred = 3
-    epochs = 4
-    lr = 0.0003
-    
-    with open('GNPSdata/ob_train_ref.pickle', 'rb') as f:
-        train_ref = pickle.load(f)
-    train_ref = pro_dataset(train_ref,2,99)
-    # train_ref = intensity_filter(train_ref,ratio = 0.01,min_len = 5)
-    with open('GNPSdata/ob_train_query.pickle', 'rb') as f:
-        train_query = pickle.load(f)
-    train_query = pro_dataset(train_query,2,99)
-    # train_query = intensity_filter(train_query,ratio = 0.01,min_len = 5)
-    with open('GNPSdata/ob_test_ref.pickle', 'rb') as f:
-        test_ref = pickle.load(f)
-    test_ref = pro_dataset(test_ref,2,99)
-    # test_ref = intensity_filter(test_ref,ratio = 0.01,min_len = 5)
-    with open('GNPSdata/ob_test_query.pickle', 'rb') as f:
-        test_query = pickle.load(f)
-    test_query= pro_dataset(test_query,2,99)
-    # test_query = intensity_filter(test_query,ratio = 0.01,min_len = 5)
-    msms1 = [i[2] for i in train_ref]
-    msms2 = [i[2] for i in train_query]
-    msms3 = [i[2] for i in test_ref]
-    msms4 = [i[2] for i in test_query]
-    precursor1 = [i[1] for i in train_ref]
-    precursor2 = [i[1] for i in train_query]
-    precursor3 = [i[1] for i in test_ref]
-    precursor4 = [i[1] for i in test_query]
-    smiles1 = [i[0] for i in train_ref]
-    smiles2 = [i[0] for i in train_query]
-    smiles3 = [i[0] for i in test_ref]
-    smiles4 = [i[0] for i in test_query]
-    # msms = msms1+msms2+msms3+msms4
-    # msms = msms1
-    
-    # all_data,word2idx = make_train_data(msms,maxlen)
-    # train_data = all_data[0:len(msms1)]
-    train_data,word2idx = make_train_data(msms1,precursor1,maxlen)
-    
-    vocab_size = len(word2idx)
-    input_ids, intensity = zip(*train_data) 
-    intensity = [torch.FloatTensor(i) for i in intensity] 
-    
-    model = BERT(vocab_size, hidden, n_layers, attn_heads, dropout,maxlen,ratio,max_pred)
-    
-    
-# data1 = torch.randint(0,100,(32,10))
-# intensity  = torch.rand(32,1,10)
-# mask = (data1 > 0).unsqueeze(1).repeat(1, data1.size(1), 1).unsqueeze(1)
-# mask = mask.numpy()
-# mask2 = get_attn_pad_mask(data1,data1)
-# mask2 = mask2.numpy()
-# test1 = bert(data1,intensity)
 
 
 
 
-# dataset_list = modelEmbed(model,msms1,batch_size,embed_dim)
-# dataset_arr = np.concatenate(dataset_list)
-# dataset_arr = dataset_arr.reshape(dataset_arr.shape[0],dataset_arr.shape[2])
-# dataset_smiles = [i[0] for i in train_ref]
-
-# query_list = modelEmbed(model,msms2,batch_size,embed_dim)
-# query_arr = np.concatenate(query_list)
-# query_arr = query_arr.reshape(query_arr.shape[0],query_arr.shape[2])
-# query_smiles = [i[0] for i in train_query]
-# top = search_top(dataset_arr,query_arr,dataset_smiles,query_smiles,batch=50)
-
-# #test
-# data_d = train_ref+test_ref
-# msms_d = [i[1] for i in data_d]
-# dataset_list = modelEmbed(model,msms_d,batch_size,embed_dim)
-# dataset_arr = np.concatenate(dataset_list)
-# dataset_arr = dataset_arr.reshape(dataset_arr.shape[0],dataset_arr.shape[2])
-# dataset_smiles = [i[0] for i in data_d]
-
-# query_msms = [i[1] for i in test_query]
-# query_list = modelEmbed(model,query_msms,batch_size,embed_dim)
-# query_arr = np.concatenate(query_list)
-# query_arr = query_arr.reshape(query_arr.shape[0],query_arr.shape[2])
-# query_smiles = [i[0] for i in test_query]
-# top2 = search_top(dataset_arr,query_arr,dataset_smiles,query_smiles,batch=50)
-
-    dataset_msms = make_test_data(msms1,precursor1,word2idx,maxlen)
-    dataset_list = model_embed(model,dataset_msms,batch_size)
-    dataset_arr = np.concatenate(dataset_list)
-    dataset_arr = dataset_arr.reshape(dataset_arr.shape[0],dataset_arr.shape[2])
-    dataset_smiles = [i[0] for i in train_ref]
-    
-    query_msms = [i[2] for i in train_query]
-    query_msms = make_test_data(query_msms,precursor2,word2idx,maxlen)
-    query_list = model_embed(model,query_msms,batch_size)
-    query_arr = np.concatenate(query_list)
-    query_arr = query_arr.reshape(query_arr.shape[0],query_arr.shape[2])
-    query_smiles = [i[0] for i in train_query]
-    top = search_top(dataset_arr,query_arr,dataset_smiles,query_smiles,batch=50)
-    
-    #test data
-    query_msms = [i[2] for i in test_query]
-    query_msms = make_test_data(query_msms,precursor4,word2idx,maxlen)
-    query_list = model_embed(model,query_msms,batch_size)
-    query_arr = np.concatenate(query_list)
-    query_arr = query_arr.reshape(query_arr.shape[0],query_arr.shape[2])
     
     
 
