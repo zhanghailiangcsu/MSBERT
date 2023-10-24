@@ -210,19 +210,7 @@ def plotCIR(MSBERT_result,specvec_result,Consine_result,colors):
     ax.legend(loc='upper left')
     ax.set_ylim(0, 1)
 
-def ParseOtherData(qtof):
-    qtof_ref,qtof_query,_,_ = make_dataset(qtof,n_max=99,test_size=0,n_decimals=2)
-    qtof_ref = pro_dataset(qtof_ref,2,99)
-    qtof_query = pro_dataset(qtof_query,2,99)
-    msms_ref = [i[2] for i in qtof_ref]
-    msms_query = [i[2] for i in qtof_query]
-    smile_ref = [i[0] for i in qtof_ref]
-    smile_query = [i[0] for i in qtof_query]
-    precursor_ref = [i[1] for i in qtof_ref]
-    precursor_query = [i[1] for i in qtof_query]
-    ref_data,word2idx = make_train_data(msms_ref,precursor_ref,100)
-    query_data,word2idx = make_train_data(msms_query,precursor_query,100)
-    return ref_data,query_data,smile_ref,smile_query
+
 
 
 
