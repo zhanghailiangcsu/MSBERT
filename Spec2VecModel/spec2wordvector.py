@@ -4,15 +4,11 @@ Created on Wed Jan 12 15:49:22 2022
 
 @author: yang
 """
-
 import re
 from typing import Union
 import numpy
 from gensim.models import Word2Vec
-from tqdm import tqdm
-import numba
 from gensim.models.basemodel import BaseTopicModel
-from matchms.similarity.BaseSimilarity import BaseSimilarity
 from spec2vec import SpectrumDocument,Document
 from matchms import Spectrum
 
