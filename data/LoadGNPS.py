@@ -5,7 +5,6 @@ Created on Mon Apr 10 09:50:08 2023
 @author: Administrator
 """
 import numpy as np
-from collections import Counter
 from tqdm import tqdm
 from matchms.importing import load_from_msp
 import pickle
@@ -22,7 +21,7 @@ from matchms.filtering import require_minimum_number_of_peaks
 
 def CountAnnotations(spectra):
     '''
-    
+    Counting the number of spectrums and unique SMILES and inchikey
     '''
     inchi_lst = []
     smiles_lst = []
@@ -44,12 +43,18 @@ def CountAnnotations(spectra):
           len(set([x[:14] for x in inchikey_lst if x])), "unique (first 14 characters)")
 
 def ApplyFilters(s):
+    '''
+    Basic matchs filters
+    '''
     s = default_filters(s)
     s = derive_adduct_from_name(s)
     s = add_parent_mass(s, estimate_from_adduct=True)
     return s
 
 def CleanMetadata(s):
+    '''
+    Clean (and extend) metadata
+    '''
     s = harmonize_undefined_inchikey(s)
     s = harmonize_undefined_inchi(s)
     s = harmonize_undefined_smiles(s)
@@ -57,18 +62,27 @@ def CleanMetadata(s):
     return s
 
 def CleanMetadata2(s):
+    '''
+    Convert entries where possible
+    '''
     s = derive_inchi_from_smiles(s)
     s = derive_smiles_from_inchi(s)
     s = derive_inchikey_from_inchi(s)
     return s
 
 def MinimalProcessing(spectrum):
+    '''
+    Filter spectrums by rules
+    '''
     spectrum = normalize_intensities(spectrum)
     spectrum = select_by_mz(spectrum, mz_from=10.0, mz_to=1000.0)
     spectrum = require_minimum_number_of_peaks(spectrum, n_required=5)
     return spectrum
 
 def CountFormulas(spectrums):
+    '''
+    Counting the number of formulas
+    '''
     formulas = []
     name_to_formulas = []
     for spec in tqdm(spectrums):
@@ -78,6 +92,9 @@ def CountFormulas(spectrums):
     return len(formulas),len(list(set(formulas)))
 
 def SeparateSpec(spectrums):
+    '''
+    Separating datasets through positive and negative ion modes
+    '''
     spectrums_positive = []
     spectrums_negative = []
     for i, spec in enumerate(spectrums):
@@ -90,6 +107,9 @@ def SeparateSpec(spectrums):
     return spectrums_positive,spectrums_negative
 
 def Annotated(spectrums_pos_processing):
+    '''
+    Obtain annotated spectrums
+    '''
     spectrums_pos_annotated = []
     for spec in tqdm(spectrums_pos_processing):
         inchikey = spec.get("inchikey")
@@ -99,6 +119,9 @@ def Annotated(spectrums_pos_processing):
     return spectrums_pos_annotated
 
 def PrecursorFilter(spectrums_pos_annotated):
+    '''
+    Using precursor ions to filtr spectrums
+    '''
     spectrums_filter = []
     for spec in tqdm(spectrums_pos_annotated):
         precursor = spec.metadata['precursor_mz']
@@ -107,6 +130,9 @@ def PrecursorFilter(spectrums_pos_annotated):
     return spectrums_filter
 
 def InstrumentFilter(spectrums_pos_annotated):
+    '''
+    Separating datasets through instrument types
+    '''
     orbitrap = []
     qtof = []
     other = []
@@ -122,6 +148,9 @@ def InstrumentFilter(spectrums_pos_annotated):
     return orbitrap,qtof,other
 
 def MakeDataset(spectrums_pos_annotated,n_max=100,test_size=0.2,n_decimals=2):
+    '''
+    Divide the dataset into training and test data
+    '''
     smiles_unique = []
     train_ref = []
     train_query = []
@@ -157,6 +186,9 @@ def MakeDataset(spectrums_pos_annotated,n_max=100,test_size=0.2,n_decimals=2):
     return train_ref,train_query,test_ref,test_query
 
 def ProDataset(data,n_decimals,n_max):
+    '''
+    Obtain information about the spectrum
+    '''
     data = [s for s1 in data for s in s1]
     data_info = []
     for spec in tqdm(data):
