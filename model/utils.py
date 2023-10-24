@@ -10,8 +10,19 @@ import torch.utils.data as Data
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
+from data.LoadGNPS import pro_dataset
 
-def dataset_sep(input_ids,intensity,val_size = 0.1):
+def ParseOrbitrap(file):
+    with open(file, 'rb') as f:
+        train_ref = pickle.load(f)
+    ref = pro_dataset(train_ref,2,99)
+    msms = [i[2] for i in ref]
+    precursor = [i[1] for i in ref]
+    smiles = [i[0] for i in ref]
+    return train_ref,msms,precursor,smiles
+
+def DatasetSep(input_ids,intensity,val_size = 0.1):
     n = len(intensity)
     perm = np.random.permutation(n)
     n_train = int(n*(1-val_size))
@@ -23,7 +34,7 @@ def dataset_sep(input_ids,intensity,val_size = 0.1):
     intensity_val = [intensity[x] for x in perm_val]
     return input_ids_train,intensity_train,input_ids_val,intensity_val
 
-def model_embed(model,test_data,batch_size):
+def ModelEmbed(model,test_data,batch_size):
     input_ids, intensity = zip(*test_data)
     intensity = [torch.FloatTensor(i) for i in intensity] 
     dataset = MyDataSet(input_ids,intensity)
@@ -38,9 +49,11 @@ def model_embed(model,test_data,batch_size):
             intensity_ = intensity_.to(device)
             pool = model.predict(input_id,intensity_)
             embed_list.append(pool.cpu().numpy())
-    return embed_list
+    embed_arr = np.concatenate(embed_list)
+    embed_arr = embed_arr.reshape(embed_arr.shape[0],embed_arr.shape[2])
+    return embed_arr
 
-def search_top(dataset_arr,query_arr,dataset_smiles,query_smiles,batch):
+def SearchTop(dataset_arr,query_arr,dataset_smiles,query_smiles,batch):
     top1 = []
     top5 = []
     top10 = []
@@ -75,7 +88,7 @@ def search_top(dataset_arr,query_arr,dataset_smiles,query_smiles,batch):
     top10 = len(top10)/len(query_smiles)
     return [top1,top5,top10]
 
-def plot_step_loss(train_loss,step=100):
+def PlotStepLoss(train_loss,step=100):
     all_loss = [p for i in train_loss for p in i]
     step_loss = [all_loss[i:i+step] for i in range(0,len(all_loss),step)]
     step_loss = [np.nanmean(i) for i in step_loss]
