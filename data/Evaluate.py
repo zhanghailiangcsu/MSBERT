@@ -4,8 +4,6 @@ Created on Tue Sep  5 09:57:27 2023
 
 @author: Administrator
 """
-import os
-os.chdir('E:/github/MSBERT')
 import numpy as np
 from rdkit import Chem
 from matchms.similarity import FingerprintSimilarity
@@ -15,15 +13,13 @@ import matplotlib.pyplot as plt
 from data.LoadGNPS import ProDataset
 from tqdm import tqdm
 import seaborn as sns
-from ms_vec import ms_to_vec
+from data.MS2Vec import ms_to_vec
 from numpy.linalg import norm
 from MSBERTModel import MSBERT
-from model.utils import ModelEmbed
+from model.utils import ModelEmbed,ParseOrbitrap
 import torch 
-from process_data import MakeTestData,MakeTrainData
+from ProcessData import MakeTestData,MakeTrainData
 from sklearn.manifold import TSNE
-
-
 
 def JaccardScore(fp1,fp2):
     u_or_v = np.bitwise_or(fp1 != 0, fp2 != 0)
@@ -213,22 +209,21 @@ def PlotPos(withpos=[0.7544,0.8748,0.8918],withoutpos=[0.7473,0.8665,0.8873]):
 
 if __name__ == '__main__':
     #计算结构相似性和原始的相似性和嵌入后的向量的相似性
+    train_ref,msms1,precursor1,smiles1 = ParseOrbitrap('GNPSdata/ob_train_ref.pickle')
+    train_query,msms2,precursor2,smiles2 =ParseOrbitrap('GNPSdata/ob_train_query.pickle')
+    test_ref,msms3,precursor3,smiles3 = ParseOrbitrap('GNPSdata/ob_test_ref.pickle')
+    test_query,msms4,precursor4,smiles4 = ParseOrbitrap('GNPSdata/ob_test_query.pickle')
+    
+    
     model_file = 'E:/MSBERT_model/912/orbitrap.pkl'
-    model = BERT(100002, 512, 6, 8, 0,100,0.2,3)
+    model = MSBERT(100002, 512, 6, 8, 0,100,3)
     model.load_state_dict(torch.load(model_file))
-    with open('GNPSdata/ob_test_query.pickle', 'rb') as f:
-        test_query = pickle.load(f)
+    
+    train_data,word2idx = MakeTrainData(msms4,precursor4,100)
+    query_msms = MakeTestData(msms4,precursor4,word2idx,100)
+    query_arr= ModelEmbed(model,query_msms,64)
+    
     data = [s for s1 in test_query for s in s1]
-    test_query= pro_dataset(test_query,2,99)
-    
-    query_msms = [i[2] for i in test_query]
-    precursor4 = [i[1] for i in test_query]
-    train_data,word2idx = make_train_data(query_msms,precursor4,100)
-    query_msms = make_test_data(query_msms,precursor4,word2idx,100)
-    query_list = model_embed(model,query_msms,64)
-    query_arr = np.concatenate(query_list)
-    query_arr = query_arr.reshape(query_arr.shape[0],query_arr.shape[2])
-    
     similarity = CalStructuralSim(data,data)
     similarity = similarity.ravel()
     consine_sim = CalCosineSim(test_query)
