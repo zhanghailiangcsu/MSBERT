@@ -88,7 +88,6 @@ def CalCosineSim(data):
     consine_list = []
     m = ms_to_vec(1,1000)
     dataset_vec = []
-    # spec = data[0]
     for spec in tqdm(data):
         peaks = spec.peaks.to_numpy
         dataset_vec.append(m.transform(peaks))
@@ -211,9 +210,6 @@ def plotCIR(MSBERT_result,specvec_result,Consine_result,colors):
     ax.legend(loc='upper left')
     ax.set_ylim(0, 1)
 
-#有了模型以后，在qtof数据上和other数据上测试嵌入的效果
-#并且和spec2vec对比，使用10epoch的模型
-
 def ParseOtherData(qtof):
     qtof_ref,qtof_query,_,_ = make_dataset(qtof,n_max=99,test_size=0,n_decimals=2)
     qtof_ref = pro_dataset(qtof_ref,2,99)
@@ -228,15 +224,7 @@ def ParseOtherData(qtof):
     query_data,word2idx = make_train_data(msms_query,precursor_query,100)
     return ref_data,query_data,smile_ref,smile_query
 
-def bertonother(MSBERTModel,ref_data,query_data,smile_ref,smile_query):
-    ref_list = model_embed(MSBERTModel,ref_data,64)
-    ref_arr = np.concatenate(ref_list)
-    ref_arr = ref_arr.reshape(ref_arr.shape[0],ref_arr.shape[2])
-    query_list = model_embed(MSBERTModel,query_data,64)
-    query_arr = np.concatenate(query_list)
-    query_arr = query_arr.reshape(query_arr.shape[0],query_arr.shape[2])
-    top = search_top(ref_arr,query_arr,smile_ref,smile_query,batch=50)
-    return top
+
 
 def spec2veconother(Spec2vecModel,qtof):
     qtof_ref,qtof_query,_,_ = make_dataset(qtof,n_max=99,test_size=0,n_decimals=2)
@@ -252,7 +240,7 @@ def spec2veconother(Spec2vecModel,qtof):
                   spec2vec_similarity,smiles1,smiles2,batch=1000)
     return Spec2VecQtofTop
 
-def CossimOnOther(qtof_ref,qtof_query):
+def CosSimOnOther(qtof_ref,qtof_query):
     qtof_ref_ = [i for s in qtof_ref for i in s]
     qtof_query_ = [i for s in qtof_query for i in s]
     qtof_ref_peak = [s.peaks.to_numpy for s in qtof_ref_]
@@ -266,8 +254,8 @@ def CossimOnOther(qtof_ref,qtof_query):
     qtof_query = pro_dataset(qtof_query,2,99)
     smile_ref = [i[0] for i in qtof_ref]
     smile_query = [i[0] for i in qtof_query]
-    consinetop = search_top(qtof_ref_peak,qtof_query_peak,smile_ref,smile_query,batch=50)
-    return consinetop
+    cosinetop = search_top(qtof_ref_peak,qtof_query_peak,smile_ref,smile_query,batch=50)
+    return cosinetop
 
 def Parse_orbitrap(file):
     with open(file, 'rb') as f:
@@ -354,13 +342,12 @@ if __name__ == '__main__':
     
     
     #在qtof数据上测试嵌入的效果
-    with open('GNPSdata/qtof.pickle', 'rb') as f:
-        qtof = pickle.load(f)
+    
     model_file = 'E:/MSBERT_model/912/orbitrap.pkl'
     MSBERTModel = BERT(100002, 512, 6, 8, 0,100,0.2,3)
     MSBERTModel.load_state_dict(torch.load(model_file))
-    ref_data,query_data,smile_ref,smile_query = ParseOtherData(qtof)
-    MSBERTQtofTop = bertonother(MSBERTModel,ref_data,query_data,smile_ref,smile_query)
+    
+    
     
     model_file = 'spec2vec_model/ob_spec2vec_iter_10.model'
     spec2vecmodel = gensim.models.Word2Vec.load(model_file)
