@@ -4,8 +4,6 @@ Created on Sat Jun 10 09:08:26 2023
 
 @author: Administrator
 """
-import os
-os.chdir('E:/github/MSBERT')
 import pickle
 import numpy as np
 from tqdm import tqdm
