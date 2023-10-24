@@ -67,10 +67,7 @@ def CalStructuralSim(spectrum1,spectrum2):
             smi = JaccardScore(fp_i,fp_j)
             similarity.append(smi) 
     return similarity
-    
 
-#计算结构相似性的代码
-#现在导出不是matchms的对象，是只包含peak和smiles的列表
 def CalStructuralSim2(spec1,spec2):
     '''
     Parameters
