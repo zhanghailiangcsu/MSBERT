@@ -4,20 +4,17 @@ Created on Wed Sep 27 09:02:19 2023
 
 @author: Administrator
 """
-#使用optuna进行超参数优化
-import os
-os.chdir('E:/github/MSBERT')
 import optuna
-from MSBERTModel2 import BERT,search_top,MyDataSet
+from model.MSBERTModel import MSBERT,MyDataSet
 import torch.optim as optim
-from evalution import MSBERT_orbitrap_Embed
+from Compare.evalution import MSBERT_orbitrap_Embed,Parse_orbitrap
 import torch.nn as nn
 import torch
 from info_nce import InfoNCE
 import torch.utils.data as Data
 from timm.scheduler import CosineLRScheduler
 from LoadGNPS import make_train_data
-from evalution import Parse_orbitrap
+from model.utils import search_top
 
 def objective(trial):
     '''
@@ -36,7 +33,7 @@ def objective(trial):
     infoloss = InfoNCE(temperature=0.01)
     criterion = nn.CrossEntropyLoss(ignore_index=0)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = BERT(100002, 512, n_layers, attn_heads, 0,100,0.2,3)
+    model = MSBERT(100002, 512, n_layers, attn_heads, 0,100,3)
     model = model.to(device)
     optimizer = optim.AdamW(model.parameters(), lr=lr,weight_decay=0.01)
     steps = epochs*len(dataloader)
@@ -68,7 +65,6 @@ def objective(trial):
 
 
 if __name__ == '__main__':
-    maxlen = 100
     train_ref,msms1,precursor1,smiles1 = Parse_orbitrap('GNPSdata/ob_train_ref.pickle')
     train_query,msms2,precursor2,smiles2 = Parse_orbitrap('GNPSdata/ob_train_query.pickle')
     train_ref,word2idx = make_train_data(msms1,precursor1,100)
