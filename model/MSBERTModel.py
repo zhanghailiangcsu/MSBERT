@@ -292,8 +292,8 @@ def plot_step_loss(train_loss,step=100):
     step_loss = [all_loss[i:i+step] for i in range(0,len(all_loss),step)]
     step_loss = [np.nanmean(i) for i in step_loss]
     plt.plot(step_loss)
-    plt.xlabel('steps')
-    plt.ylabel('loss')
+    plt.xlabel('Steps')
+    plt.ylabel('Loss')
 
 
 
