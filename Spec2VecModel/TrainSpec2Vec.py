@@ -93,14 +93,12 @@ if __name__ == '__main__':
     test_ref,msms3,precursor3,smiles3 = ParseOrbitrap('GNPSdata/ob_test_ref.pickle')
     test_query,msms4,precursor4,smiles4 = ParseOrbitrap('GNPSdata/ob_test_query.pickle')
     
-    msms = msms1+msms2+msms3+msms4
-    
     reference_documents,spectrums = gen_reference_documents(train_ref,n_decimals=2)
     
     
     model_file = "Spec2VecModel/ob_spec2vec.model"
     # model = gensim.models.Word2Vec.load(model_file)
-    model = train_new_word2vec_model(reference_documents, iterations=[10,20,30,40], 
+    model = train_new_word2vec_model(reference_documents, iterations=10, 
                                       filename=model_file,vector_size=512,
                                       workers=10, progress_logger=True)
     query_documents,query_spectrums = gen_reference_documents(train_query,n_decimals=2)
