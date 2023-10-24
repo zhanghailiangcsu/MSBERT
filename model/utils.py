@@ -11,6 +11,18 @@ from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
 
+def dataset_sep(input_ids,intensity,val_size = 0.1):
+    n = len(intensity)
+    perm = np.random.permutation(n)
+    n_train = int(n*(1-val_size))
+    perm_train = perm[0:n_train]
+    perm_val = perm[n_train:]
+    input_ids_train = [input_ids[x] for x in perm_train] 
+    input_ids_val = [input_ids[x] for x in perm_val] 
+    intensity_train = [intensity[x] for x in perm_train]
+    intensity_val = [intensity[x] for x in perm_val]
+    return input_ids_train,intensity_train,input_ids_val,intensity_val
+
 def model_embed(model,test_data,batch_size):
     input_ids, intensity = zip(*test_data)
     intensity = [torch.FloatTensor(i) for i in intensity] 
