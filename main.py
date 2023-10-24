@@ -13,6 +13,7 @@ import torch
 from model.MSBERTModel import MSBERT
 from model.Train import  TrainMSBERT
 from model.utils import ModelEmbed,SearchTop,ParseOrbitrap,CalMSBERTTop
+from model.utils import ParseOtherData
 import numpy as np
 
 
