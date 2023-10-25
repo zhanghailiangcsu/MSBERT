@@ -9,8 +9,35 @@ from model.utils import ModelEmbed
 import torch
 from MSBERTModel import MSBERT
 from sklearn.cluster import Birch
+from sklearn import metrics
+from sklearn.metrics import rand_score,adjusted_rand_score,homogeneity_score
+from sklearn.metrics import homogeneity_completeness_v_measure,completeness_score
+import numpy as np
 
 
+def BirchCluster(n_clusters,test_arr):
+    brc = Birch(threshold=0.7,n_clusters=n_clusters)
+    brc.fit(test_arr)
+    return brc
+
+def GenRawLabel(smiles_unique,smiles):
+    smi = smiles_unique[0]
+    raw_label = np.zeros(len(smiles))
+    l = 0
+    for smi in smiles_unique:
+        idx = [i for i,v in enumerate(smiles) if v == smi]
+        raw_label[idx] = l
+        l += 1
+    return raw_label
+
+def CalEvaluate(labels_true, labels_pred):
+    ari = metrics.adjusted_rand_score(labels_true, labels_pred)
+    homogeneity = metrics.homogeneity_score(labels_true, labels_pred)
+    completeness = metrics.completeness_score(labels_true, labels_pred)
+    v_measure = metrics.v_measure_score(labels_true, labels_pred, beta=0.5)
+    result = {'ARI':ari,'homogeneity':homogeneity,
+              'completeness':completeness,'v_measure':v_measure}
+    return result
 
 if __name__ == '__main__':
     maxlen = 100
@@ -27,8 +54,13 @@ if __name__ == '__main__':
     MSBERTmodel.load_state_dict(torch.load('E:/MSBERT_model/1025/MSBERT.pkl'))
     test_arr = ModelEmbed(MSBERTmodel,test_ref,batch_size)
     smiles_unique = list(set(smiles3))
+    raw_label = GenRawLabel(smiles_unique,smiles3)
     
-    brc = Birch(n_clusters=len(smiles_unique))
-    brc.fit(test_arr)
+    n_clusters = len(smiles_unique)
+    brc = BirchCluster(n_clusters,test_arr)
+    label = brc.predict(test_arr)
+    # smiles = smiles3
+    result = CalEvaluate(label,raw_label)
+    
     
 
