@@ -28,7 +28,7 @@ if __name__ == '__main__':
     n_layers = 6
     attn_heads = 16
     max_pred = 3
-    epochs = 1
+    epochs = 4
     lr = 0.0003
     temperature = 0.01
     
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     train_query,word2idx = MakeTrainData(msms2,precursor2,100)
     test_ref,word2idx = MakeTrainData(msms3,precursor3,100)
     test_query,word2idx = MakeTrainData(msms4,precursor4,100)
-    train_data,word2idx = MakeTrainData(msms1,precursor1,maxlen)
+    train_data = train_ref
     
     vocab_size = len(word2idx)
     input_ids, intensity = zip(*train_data) 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     
     MSBERTmodel = MSBERT(vocab_size, hidden, n_layers, attn_heads, dropout,maxlen,max_pred)
     MSBERTmodel,train_loss,val_loss = TrainMSBERT(MSBERTmodel,input_ids,intensity,batch_size,epochs,lr,temperature)
-    torch.save(MSBERTmodel.state_dict(),'E:/MSBERT_model/1012two_stage/mask.pkl')
+    torch.save(MSBERTmodel.state_dict(),'E:/MSBERT_model/1025/MSBERT.pkl')
     
     top = CalMSBERTTop(MSBERTmodel,train_ref,train_query,smiles1,smiles2)
     
