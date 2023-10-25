@@ -15,10 +15,10 @@ from tqdm import tqdm
 import seaborn as sns
 from data.MS2Vec import ms_to_vec
 from numpy.linalg import norm
-from MSBERTModel import MSBERT
+from model.MSBERTModel import MSBERT
 from model.utils import ModelEmbed,ParseOrbitrap
 import torch 
-from ProcessData import MakeTestData,MakeTrainData
+from data.ProcessData import MakeTestData,MakeTrainData
 from sklearn.manifold import TSNE
 
 def JaccardScore(fp1,fp2):
@@ -215,8 +215,8 @@ if __name__ == '__main__':
     test_query,msms4,precursor4,smiles4 = ParseOrbitrap('GNPSdata/ob_test_query.pickle')
     
     
-    model_file = 'E:/MSBERT_model/912/orbitrap.pkl'
-    model = MSBERT(100002, 512, 6, 8, 0,100,3)
+    model_file = 'E:/MSBERT_model/1025/MSBERT.pkl'
+    model = MSBERT(100002, 512, 6, 16, 0,100,3)
     model.load_state_dict(torch.load(model_file))
     
     train_data,word2idx = MakeTrainData(msms4,precursor4,100)
@@ -224,11 +224,11 @@ if __name__ == '__main__':
     query_arr= ModelEmbed(model,query_msms,64)
     
     data = [s for s1 in test_query for s in s1]
-    similarity = CalStructuralSim(data,data)
+    similarity = CalStructuralSim2(data,data)
     similarity = similarity.ravel()
     consine_sim = CalCosineSim(test_query)
     embed_sim = CalEmbedSim(query_arr)
-    plt.scatter(embed_sim,similarity)
+    plt.scatter(embed_sim,similarity,s=0.1)
     
     plotSimDensity(similarity,consine_sim,embed_sim)
     
