@@ -206,6 +206,27 @@ def PlotPos(withpos=[0.7544,0.8748,0.8918],withoutpos=[0.7473,0.8665,0.8873]):
     ax.set_xticks(x + width, species)
     ax.legend(loc='upper left')
     ax.set_ylim(0, 1)
+    
+def PlotCluster(MSBERT_result,specvec_result,raw_result,colors):
+    species = ("ARI", "Homogeneity", "Completeness",'v-score')
+    penguin_means = {
+    'MSBERT': MSBERT_result,
+    'Spec2Vec': specvec_result,
+    'Raw MS/MS': raw_result}
+    x = np.arange(len(species))
+    width = 0.2
+    multiplier = 0
+    fig, ax = plt.subplots(layout='constrained')
+    for attribute, measurement in penguin_means.items():
+        offset = width * multiplier
+        rects = ax.bar(x + offset, measurement, width, label=attribute,color=colors[multiplier])
+        # ax.bar_label(rects, padding=3)
+        multiplier += 1
+    ax.set_ylabel('Values', fontsize=15)
+    plt.tick_params(labelsize=15)
+    ax.set_xticks(x + width, species)
+    ax.legend(loc='upper left')
+    ax.set_ylim(0, 1)
 
 if __name__ == '__main__':
     #计算结构相似性和原始的相似性和嵌入后的向量的相似性
@@ -245,6 +266,14 @@ if __name__ == '__main__':
     colors = ['#F37878','#E8E46E','#91D18B']
     plotCIR(MSBERT_result,specvec_result,Consine_result,colors)
     plt.savefig('D:/paper/MSBERT/MSBERT_20230813/figures/mask.tif',dpi = 300)
+    
+    #聚类结果展示
+    MSBERT_result = [0.2009,0.7744,0.8832,0.84558]
+    specvec_result = [0.1095,0.7098,0.7534,0.7383]
+    raw_result = [0.0143,0.6617,0.5856,0.6089]
+    colors = ['#F37878','#E8E46E','#91D18B']
+    PlotCluster(MSBERT_result,specvec_result,raw_result,colors)
+    plt.savefig('D:/paper/MSBERT/MSBERT_20230813/figures/1/cluster.tif',dpi = 300)
     
     
     
