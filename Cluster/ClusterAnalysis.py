@@ -15,10 +15,13 @@ from data.ProcessData import MakeTrainData
 from data.MS2Vec import ms_to_vec
 
 def MSBERTCluster(model_file,test_data,msms,precursor,smiles):
+    '''
+    Cluster analysis using MSBERT embedded vectors and obtain results
+    '''
     MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,3)
     MSBERTmodel.load_state_dict(torch.load(model_file))
     test_data2,word2idx = MakeTrainData(msms,precursor,100)
-    test_arr = ModelEmbed(MSBERTmodel,test_data2,batch_size)
+    test_arr = ModelEmbed(MSBERTmodel,test_data2,32)
     smiles_unique = list(set(smiles))
     labels_true = GenRawLabel(smiles_unique,smiles)
     brc = BirchCluster(len(smiles_unique),test_arr)
@@ -27,6 +30,9 @@ def MSBERTCluster(model_file,test_data,msms,precursor,smiles):
     return msbert_result
 
 def Spec2VecCluster(model_file,test_data,smiles):
+    '''
+    Cluster analysis using Spec2Vec embedded vectors and obtain results
+    '''
     smiles_unique = list(set(smiles))
     labels_true = GenRawLabel(smiles_unique,smiles)
     spectrums = [s for s1 in test_data for s in s1]
@@ -38,6 +44,9 @@ def Spec2VecCluster(model_file,test_data,smiles):
     return spec2vec_result
 
 def MSMSCluster(test_data,smiles):
+    '''
+    Cluster analysis using raw MS/MS and obtain results
+    '''
     smiles_unique = list(set(smiles))
     labels_true = GenRawLabel(smiles_unique,smiles)
     spectrums = [s for s1 in test_data for s in s1]
@@ -48,6 +57,9 @@ def MSMSCluster(test_data,smiles):
     return msms_result
 
 def MSMS2Vec(spectrums):
+    '''
+    Converting MS/MS into vectors using binning method
+    '''
     m = ms_to_vec()
     peaks = [s.peaks.to_numpy for s in spectrums]
     peaks = [m.transform(i) for i in peaks]
@@ -55,11 +67,17 @@ def MSMS2Vec(spectrums):
     return peaks_vec
 
 def BirchCluster(n_clusters,test_arr):
+    '''
+    Train Brich clustering model
+    '''
     brc = Birch(threshold=0.5,n_clusters=n_clusters)
     brc.fit(test_arr)
     return brc
 
 def GenRawLabel(smiles_unique,smiles):
+    '''
+    Generate true labels from SMILES
+    '''
     smi = smiles_unique[0]
     raw_label = np.zeros(len(smiles))
     l = 0
@@ -70,6 +88,9 @@ def GenRawLabel(smiles_unique,smiles):
     return raw_label
 
 def CalEvaluate(labels_true, labels_pred):
+    '''
+    Calculate clustering metrics
+    '''
     ari = metrics.adjusted_rand_score(labels_true, labels_pred)
     homogeneity = metrics.homogeneity_score(labels_true, labels_pred)
     completeness = metrics.completeness_score(labels_true, labels_pred)
