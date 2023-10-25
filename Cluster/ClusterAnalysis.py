@@ -79,15 +79,7 @@ def CalEvaluate(labels_true, labels_pred):
     return result
 
 if __name__ == '__main__':
-    maxlen = 100
-    batch_size = 32
-    dropout = 0
-    hidden=512
-    n_layers = 6
-    attn_heads = 16
-    max_pred = 3
-    vocab_size = 100002
-    
+
     test_ref,msms3,precursor3,smiles3 = ParseOrbitrap('GNPSdata/ob_test_ref.pickle')
 
     msbert_result = MSBERTCluster('E:/MSBERT_model/1025/MSBERT.pkl',test_ref,msms3,precursor3,smiles3)
