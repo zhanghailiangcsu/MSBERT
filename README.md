@@ -1,6 +1,11 @@
 # MSBERT
 Improve the accuracy of database search by using BERT to embed MS/MS reasonably 
 # 1. Introduction
+In this study, MSBERT based on mask learning and contrastive learning was proposed to get a reasonable embedding representation of MS/MS. 
+MSBERT used the transformer encoder as the backbone and take advantage of the randomness of the mask to construct positive samples for contrastive learning. 
+MSBERT was trained and tested on GNPS dataset. MSBERT had a stronger ability in library matching, with top 1, top5, and top 10 were 0.7871, 0.8950, and 0.9080 on Orbitrap test dataset. 
+The results are significantly better than Spec2Vec and cosine similarity. 
+The rationality of embedding was demonstrated by reducing the dimensionality of the embedding vectors, calculating structural similarity, and spectra clustering. 
 
 # 2. Depends
 [Anaconda](https://www.anaconda.com) for Python 3.9  
