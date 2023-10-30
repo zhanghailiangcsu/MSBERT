@@ -60,7 +60,9 @@ def objective(trial):
         top = SearchTop(train_ref_arr,train_query_arr,smiles1,smiles2,batch=50)
         top1 = top[0]
     return top1
-
+    
+    
+    
 
 
 if __name__ == '__main__':
