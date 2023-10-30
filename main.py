@@ -37,23 +37,23 @@ if __name__ == '__main__':
     test_ref,msms3,precursor3,smiles3 = ParseOrbitrap('GNPSdata/ob_test_ref.pickle')
     test_query,msms4,precursor4,smiles4 = ParseOrbitrap('GNPSdata/ob_test_query.pickle')
     
-    train_ref,word2idx = MakeTrainData(msms1,precursor1,100)
-    train_query,word2idx = MakeTrainData(msms2,precursor2,100)
-    test_ref,word2idx = MakeTrainData(msms3,precursor3,100)
-    test_query,word2idx = MakeTrainData(msms4,precursor4,100)
+    train_ref2,word2idx = MakeTrainData(msms1,precursor1,100)
+    train_query2,word2idx = MakeTrainData(msms2,precursor2,100)
+    test_ref2,word2idx = MakeTrainData(msms3,precursor3,100)
+    test_query2,word2idx = MakeTrainData(msms4,precursor4,100)
     
     vocab_size = len(word2idx)
-    input_ids, intensity = zip(*train_ref) 
+    input_ids, intensity = zip(*train_ref2) 
     intensity = [torch.FloatTensor(i) for i in intensity] 
     
     MSBERTmodel = MSBERT(vocab_size, hidden, n_layers, attn_heads, dropout,maxlen,max_pred)
     MSBERTmodel,train_loss,val_loss = TrainMSBERT(MSBERTmodel,input_ids,intensity,batch_size,epochs,lr,temperature)
     # torch.save(MSBERTmodel.state_dict(),'E:/MSBERT_model/temperature/0005.pkl')
     
-    top = CalMSBERTTop(MSBERTmodel,train_ref,train_query,smiles1,smiles2)
+    top = CalMSBERTTop(MSBERTmodel,train_ref2,train_query2,smiles1,smiles2)
     ref_list = train_ref+test_ref
     smiles_list = smiles1+smiles3
-    top2 = CalMSBERTTop(MSBERTmodel,ref_list,test_query,smiles_list,smiles4)
+    top2 = CalMSBERTTop(MSBERTmodel,ref_list,test_query2,smiles_list,smiles4)
     
     model_file = 'Spec2vecModel/ob_all.model'
     Spec2VecModel = gensim.models.Word2Vec.load(model_file)
