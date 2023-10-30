@@ -16,6 +16,9 @@ from data.ProcessData import MakeTestData,MakeTrainData
 from data.MS2Vec import ms_to_vec
 
 def CalCosineTop(qtof_ref,qtof_query):
+    '''
+    Library matching performance for calculating cosine similarity
+    '''
     qtof_ref_ = [i for s in qtof_ref for i in s]
     qtof_query_ = [i for s in qtof_query for i in s]
     qtof_ref_peak = [s.peaks.to_numpy for s in qtof_ref_]
@@ -33,6 +36,9 @@ def CalCosineTop(qtof_ref,qtof_query):
     return cosinetop
 
 def ParseOrbitrap(file):
+    '''
+    Parsing Orbitrap Datasets
+    '''
     with open(file, 'rb') as f:
         train_ref = pickle.load(f)
     ref = ProDataset(train_ref,2,99)
@@ -42,12 +48,18 @@ def ParseOrbitrap(file):
     return train_ref,msms,precursor,smiles
 
 def CalMSBERTTop(MSBERTModel,ref_data,query_data,smile_ref,smile_query):
+    '''
+    Library matching performance for MSBERT
+    '''
     ref_arr = ModelEmbed(MSBERTModel,ref_data,64)
     query_arr = ModelEmbed(MSBERTModel,query_data,64)
     top = SearchTop(ref_arr,query_arr,smile_ref,smile_query,batch=50)
     return top
 
 def ParseOtherData(other):
+    '''
+    Parsing other types of instrument datasets
+    '''
     other_ref,other_query,_,_ = MakeDataset(other,n_max=99,test_size=0,n_decimals=2)
     other_ref = ProDataset(other_ref,2,99)
     other_query = ProDataset(other_query,2,99)
@@ -62,6 +74,9 @@ def ParseOtherData(other):
     return ref_data,query_data,smile_ref,smile_query
 
 def DatasetSep(input_ids,intensity,val_size = 0.1):
+    '''
+    Split the dataset for training and testing
+    '''
     n = len(intensity)
     perm = np.random.permutation(n)
     n_train = int(n*(1-val_size))
@@ -74,6 +89,9 @@ def DatasetSep(input_ids,intensity,val_size = 0.1):
     return input_ids_train,intensity_train,input_ids_val,intensity_val
 
 def ModelEmbed(model,test_data,batch_size):
+    '''
+    Using MSBERT for MS/MS embedding
+    '''
     input_ids, intensity = zip(*test_data)
     intensity = [torch.FloatTensor(i) for i in intensity] 
     dataset = MyDataSet(input_ids,intensity)
@@ -93,6 +111,9 @@ def ModelEmbed(model,test_data,batch_size):
     return embed_arr
 
 def SearchTop(dataset_arr,query_arr,dataset_smiles,query_smiles,batch):
+    '''
+    Top-n metrics for computing library matching
+    '''
     top1 = []
     top5 = []
     top10 = []
@@ -128,6 +149,9 @@ def SearchTop(dataset_arr,query_arr,dataset_smiles,query_smiles,batch):
     return [top1,top5,top10]
 
 def PlotStepLoss(train_loss,step=100):
+    '''
+    Draw loss curve
+    '''
     all_loss = [p for i in train_loss for p in i]
     step_loss = [all_loss[i:i+step] for i in range(0,len(all_loss),step)]
     step_loss = [np.nanmean(i) for i in step_loss]
