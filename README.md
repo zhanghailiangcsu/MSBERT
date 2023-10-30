@@ -1,5 +1,5 @@
 # MSBERT
-Improve the accuracy of database search by using BERT to embed MS/MS reasonably 
+Mass Spectrometer Embedder for Improving Mass Spectrometry Similarity Score Using BERT
 # 1. Introduction
 In this study, MSBERT based on mask learning and contrastive learning was proposed to get a reasonable embedding representation of MS/MS. 
 MSBERT used the transformer encoder as the backbone and take advantage of the randomness of the mask to construct positive samples for contrastive learning. 
