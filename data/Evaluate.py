@@ -219,6 +219,54 @@ def PlotCluster(MSBERT_result,specvec_result,raw_result,colors):
     fig, ax = plt.subplots(layout='constrained')
     for attribute, measurement in penguin_means.items():
         offset = width * multiplier
+        rects = ax.bar(x + offset, measurement, width, label=attribute,
+                       color=colors[multiplier],edgecolor='black',linewidth=0.5)
+        # ax.bar_label(rects, padding=3)
+        multiplier += 1
+    ax.set_ylabel('Values', fontsize=15)
+    plt.tick_params(labelsize=15)
+    ax.set_xticks(x + width, species)
+    ax.legend(loc='upper left',frameon=False)
+    ax.set_ylim(0, 1)
+    
+
+def PlotTemperature(t1,t2,t3,t4,t5,t6,t7):
+    species = ("TOP1", "TOP5", "TOP10")
+    penguin_means = {
+    '1':t1 ,
+    '0.5': t2,
+    '0.1': t3,
+    '0.07':t4,
+    '0.05':t5,
+    '0.01':t6,
+    '0.005':t7}
+    x = np.arange(len(species))
+    width = 0.1
+    multiplier = 0
+    fig, ax = plt.subplots(layout='constrained')
+    for attribute, measurement in penguin_means.items():
+        offset = width * multiplier
+        rects = ax.bar(x + offset, measurement, width, label=attribute,color=colors[multiplier])
+        # ax.bar_label(rects, padding=3)
+        multiplier += 1
+    ax.set_ylabel('Values', fontsize=15)
+    plt.tick_params(labelsize=15)
+    ax.set_xticks(x + width, species)
+    ax.legend(loc='upper left')
+    ax.set_ylim(0, 1.25)
+
+def PlotSplit(MSBERT_result,mask_result,comparative_result,colors):
+    species = ("TOP1", "TOP5", "TOP10")
+    penguin_means = {
+    'MSBERT': MSBERT_result,
+    'Mask': mask_result,
+    'Comparative': comparative_result}
+    x = np.arange(len(species))
+    width = 0.25
+    multiplier = 0
+    fig, ax = plt.subplots(layout='constrained')
+    for attribute, measurement in penguin_means.items():
+        offset = width * multiplier
         rects = ax.bar(x + offset, measurement, width, label=attribute,color=colors[multiplier])
         # ax.bar_label(rects, padding=3)
         multiplier += 1
@@ -271,9 +319,31 @@ if __name__ == '__main__':
     MSBERT_result = [0.2009,0.7744,0.8832,0.84558]
     specvec_result = [0.1095,0.7098,0.7534,0.7383]
     raw_result = [0.0143,0.6617,0.5856,0.6089]
-    colors = ['#F37878','#E8E46E','#91D18B']
+    colors = ['#fc8d59','#ffffbf','#91cf60']
     PlotCluster(MSBERT_result,specvec_result,raw_result,colors)
     plt.savefig('D:/paper/MSBERT/MSBERT_20230813/figures/1/cluster.tif',dpi = 300)
+    
+    #Temperature
+    
+    t1 = [0.6720,0.7888,0.8196]
+    t2 = [0.6667,0.8090,0.8362]
+    t3 = [0.7615,0.8891,0.9098]
+    t4 = [0.7651,0.8873,0.9086]
+    t5 = [0.7823,0.8962,0.9146]
+    t6 = [0.7870,0.9012,0.9180]
+    t7 = [0.7787,0.8890,0.9086]
+    colors = ['#f94144','#f3722c','#f8961e','#f9c74f','#90be6d','#43aa8b','#577590']
+    PlotTemperature(t1,t2,t3,t4,t5,t6,t7)
+    plt.savefig('D:/paper/MSBERT/MSBERT_20230813/figures/1/temperature.tif',dpi = 300)
+    
+    #split
+    MSBERT_result = [0.7871,0.8950,0.9098]
+    mask_result = [0.7615,0.8712,0.8926]
+    comparative_result = [0.5889,0.7206,0.7544]
+    PlotSplit(MSBERT_result,mask_result,comparative_result,colors)
+    plt.savefig('D:/paper/MSBERT/MSBERT_20230813/figures/1/split.tif',dpi = 300)
+    help(ax.bar)
+    
     
     
     
