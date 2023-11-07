@@ -51,7 +51,7 @@ if __name__ == '__main__':
     # torch.save(MSBERTmodel.state_dict(),'E:/MSBERT_model/temperature/0005.pkl')
     
     top = CalMSBERTTop(MSBERTmodel,train_ref2,train_query2,smiles1,smiles2)
-    ref_list = train_ref+test_ref
+    ref_list = train_ref2+test_ref2
     smiles_list = smiles1+smiles3
     top2 = CalMSBERTTop(MSBERTmodel,ref_list,test_query2,smiles_list,smiles4)
     
