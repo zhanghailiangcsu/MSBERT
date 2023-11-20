@@ -94,6 +94,7 @@ def ModelEmbed(model,test_data,batch_size):
     '''
     input_ids, intensity = zip(*test_data)
     intensity = [torch.FloatTensor(i) for i in intensity] 
+    input_ids = [torch.LongTensor(i) for i in input_ids] 
     dataset = MyDataSet(input_ids,intensity)
     dataloader = Data.DataLoader(dataset, batch_size=batch_size, shuffle=False)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
