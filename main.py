@@ -49,6 +49,7 @@ if __name__ == '__main__':
     MSBERTmodel = MSBERT(vocab_size, hidden, n_layers, attn_heads, dropout,maxlen,max_pred)
     MSBERTmodel,train_loss,val_loss = TrainMSBERT(MSBERTmodel,input_ids,intensity,batch_size,epochs,lr,temperature)
     # torch.save(MSBERTmodel.state_dict(),'E:/MSBERT_model/temperature/0005.pkl')
+    MSBERTmodel.load_state_dict(torch.load('E:/MSBERT_model/1025/MSBERT.pkl'))
     
     top = CalMSBERTTop(MSBERTmodel,train_ref2,train_query2,smiles1,smiles2)
     ref_list = train_ref2+test_ref2
