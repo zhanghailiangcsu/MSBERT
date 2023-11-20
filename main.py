@@ -45,6 +45,7 @@ if __name__ == '__main__':
     vocab_size = len(word2idx)
     input_ids, intensity = zip(*train_ref2) 
     intensity = [torch.FloatTensor(i) for i in intensity] 
+    input_ids = [torch.LongTensor(i) for i in input_ids] 
     
     MSBERTmodel = MSBERT(vocab_size, hidden, n_layers, attn_heads, dropout,maxlen,max_pred)
     MSBERTmodel,train_loss,val_loss = TrainMSBERT(MSBERTmodel,input_ids,intensity,batch_size,epochs,lr,temperature)
