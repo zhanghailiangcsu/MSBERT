@@ -255,10 +255,26 @@ class MSBERT(nn.Module):
         atten_mask = (input_id == 0).unsqueeze(1).repeat(1, input_id.size(1), 1).unsqueeze(1)
         for idx,transformer in enumerate(self.transformer_blocks):                                  
             output = transformer.forward(output, atten_mask)
-            if idx == 0:
-                output2 = output
-        output = (output+output2)/2
         pool = torch.matmul(intensity,output)
         pool = pool/intensity.shape[1]  
         return pool
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
