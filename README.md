@@ -31,7 +31,7 @@ pip install -r requirements.txt
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 ```
 # 4. Usage
-The WeightFormer is public at [homepage](https://github.com/zhanghailiangcsu), every user can download and use it.
+The MSBERT is public at [homepage](https://github.com/zhanghailiangcsu), every user can download and use it.
 You can download the trained model on Github.
 Then refer to the example to use the model for prediction, and directly obtain the embedding vectors from MS/MS.
 Alternatively, you can retrain MSBEERT on your own data refer to example.
