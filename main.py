@@ -81,13 +81,6 @@ if __name__ == '__main__':
     CosineTop = CalCosineTop(other_ref,other_query)
     
     
-    # test CorpusRedundancy methods
-    embed_arr1,embed_arr2 = CorpusRedundancy(MSBERTmodel,train_ref2,train_query2,batch_size)
-    top_test = SearchTop(embed_arr1,embed_arr2,smiles1,smiles2,batch_size)
-    
-    embed_arr1,embed_arr2 = CorpusRedundancy(MSBERTmodel,ref_list,test_query2,batch_size)
-    top_test2 = SearchTop(embed_arr1,embed_arr2,smiles_list,smiles4,batch_size)
-    
 
 
 
