@@ -63,7 +63,7 @@ def TrainMask(model,input_ids,intensity,batch_size,epochs,lr):
             print(str(epoch)+'epoch val_loss'+str(np.nanmean(val_step_loss)))
     return model,train_loss,val_loss
 
-def TrainComparative(model,input_ids,intensity,batch_size,epochs,lr,temperature = 0.01):
+def TrainContrastive(model,input_ids,intensity,batch_size,epochs,lr,temperature = 0.01):
     input_ids_train,intensity_train,input_ids_val,intensity_val = DatasetSep(input_ids,intensity,val_size = 0.1)
     dataset = MyDataSet(input_ids_train,intensity_train)
     dataloader = Data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
