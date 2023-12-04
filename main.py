@@ -27,7 +27,7 @@ if __name__ == '__main__':
     hidden=512
     n_layers = 6
     attn_heads = 16
-    max_pred = 3
+    max_pred = 2
     epochs = 4
     lr = 0.0003
     temperature = 0.005
@@ -79,6 +79,7 @@ if __name__ == '__main__':
     other_ref,other_query,_,_ = MakeDataset(other,n_max=99,test_size=0,n_decimals=2)
     Spec2VecOtherTop = CalSpec2VecTop(Spec2VecModel,other_ref,other_query)
     CosineTop = CalCosineTop(other_ref,other_query)
+    
     
     
 
