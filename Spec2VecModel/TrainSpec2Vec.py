@@ -35,7 +35,7 @@ def parse_msms(msms):
 
 def peak_embed(model_file,spectrums,n_decimals=2):
     model = gensim.models.Word2Vec.load(model_file)
-    spectovec = spec_to_wordvector(model=model, intensity_weighting_power=0.5,allowed_missing_percentage=20)
+    spectovec = spec_to_wordvector(model=model, intensity_weighting_power=0.5,allowed_missing_percentage=50)
     word2vectors = []
     for i in range(len(spectrums)):
         spectrum_in = SpectrumDocument(spectrums[i], n_decimals=n_decimals)
