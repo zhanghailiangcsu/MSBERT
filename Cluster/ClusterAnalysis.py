@@ -103,7 +103,7 @@ if __name__ == '__main__':
 
     test_ref,msms3,precursor3,smiles3 = ParseOrbitrap('GNPSdata/ob_test_ref.pickle')
 
-    msbert_result = MSBERTCluster('E:/MSBERT_model/1025/MSBERT.pkl',test_ref,msms3,precursor3,smiles3)
+    msbert_result = MSBERTCluster('MSBERT.pkl',test_ref,msms3,precursor3,smiles3)
     spec2vec_result = Spec2VecCluster('Spec2vecModel/ob_all.model',test_ref,smiles3)
     msms_result = MSMSCluster(test_ref,smiles3)
     
