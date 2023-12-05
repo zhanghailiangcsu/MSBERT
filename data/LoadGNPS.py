@@ -124,8 +124,10 @@ def PrecursorFilter(spectrums_pos_annotated):
     '''
     spectrums_filter = []
     for spec in tqdm(spectrums_pos_annotated):
-        precursor = spec.metadata['precursor_mz']
-        if precursor < 1000:
+        precursor = spec.get('precursor_mz')
+        if precursor == None:
+            continue
+        if float(precursor) < 1000:
             spectrums_filter.append(spec)
     return spectrums_filter
 
