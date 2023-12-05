@@ -41,7 +41,7 @@ def MakeTrainData(sentences,precursor,maxlen):
     peaks = [i[0] for i in sentences]
     peaks = [[float(i) for i in j] for j in peaks]
     peaks = [["%.2f"%(i) for i in j] for j in peaks]
-    precursor = ["%.2f"%(i) for i in precursor]
+    precursor = ["%.2f"%float(i) for i in precursor]
     word_list = list(np.round(np.linspace(0,1000,100*1000,endpoint=False),2))
     word_list = ["%.2f"%(i) for i in word_list]
     word2idx = {'[PAD]' : 0, '[MASK]' : 1}
