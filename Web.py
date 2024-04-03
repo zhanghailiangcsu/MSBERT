@@ -4,8 +4,7 @@ Created on Mon Mar 25 17:05:57 2024
 
 @author: Administrator
 """
-# import os 
-# os.chdir('E:\github\MSBERT')
+
 import numpy as np
 import streamlit as st
 import pandas as pd
