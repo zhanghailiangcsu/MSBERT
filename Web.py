@@ -21,7 +21,6 @@ def ProcessMSP(file):
     '''
     Load dataset from MSP and prepare for MSBERT
     '''
-    # file = 'q.msp'
     msms = list(load_from_msp(file))
     pro_data = ProDataset([msms],2,99)
     msms = [i[2] for i in pro_data]
