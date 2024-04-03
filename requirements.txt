@@ -11,3 +11,4 @@ seaborn==0.11.2
 spec2vec==0.8.0
 timm==0.6.7
 tqdm==4.64.0
+streamlit==1.29.0
