@@ -34,7 +34,13 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 The MSBERT is public at [homepage](https://github.com/zhanghailiangcsu), every user can download and use it.
 You can download the trained model on Github.
 Then refer to the example to use the model for prediction, and directly obtain the embedding vectors from MS/MS.
-Alternatively, you can retrain MSBEERT on your own data refer to example.
+Alternatively, you can retrain MSBEERT on your own data refer to example.  
+If you want to use MSBERT web services, you can use the following two methods.
+The first method is to use the [link](https://msbert-web.streamlit.app/)  
+The second method is to run the following code.  
+```
+streamlit run Web.py
+```
 # 5.Contact
 Hailiang Zhang  
 E-mail 2352434994@qq.com  
