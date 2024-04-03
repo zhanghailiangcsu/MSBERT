@@ -89,7 +89,7 @@ def GUI():
     with col1:
         if st.button('Embedding'):
             MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,2)
-            MSBERTmodel.load_state_dict(torch.load('MSBERT.pkl'))
+            MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl'))
             if query_msp_file is not None:
                 data_q = ProcessMSP(query_msp_file.name)
                 st.session_state.smiles_q = data_q[1]
