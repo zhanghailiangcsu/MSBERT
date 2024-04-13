@@ -15,6 +15,8 @@ from data.ProcessData import MakeTrainData
 from model.MSBERTModel import MSBERT
 import torch
 from model.utils import ModelEmbed
+MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,2)
+MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl'))
 
 def ProcessMSP(file):
     '''
@@ -55,27 +57,10 @@ def DatasetMatch(ref_arr,query_arr,ref_smiles,query_smiles):
 
 def GUI():
     st.title("MSBERT: Embedding Tandem Mass Spectra into Chemically Rational Space")
-    st.subheader('Query dataset')
-    st.write('Query spectral dataset file (.msp)')
-    query_msp_file = st.file_uploader('Upload MSP file(.msp)', type='msp',
-                                         accept_multiple_files=False,key=1)
-    
-    st.subheader('Reference dataset')
-    st.write('The format of the reference dataset is optional.', 
-             'The first format is the msp format, and the second format is the pickle format.' ,
-             'If the reference dataset file (pickle) was saved in previous experiments,',
-             'it can be used directly to save time.')
-    st.write('Reference spectral dataset file (.msp)')
-    reference_msp_file = st.file_uploader('Upload MSP file(.msp)', type='msp',
-                                         accept_multiple_files=False,key=3)
-    st.write('Reference spectral dataset file (.pickle)')
-    reference_pickle_file = st.file_uploader('Upload pickle file(.pickle)', type='pickle',
-                                       accept_multiple_files=False,key=4)
-    
     if "embedding_q" not in st.session_state:
-        st.session_state.embedding_q = None
+        st.session_state.embedding_q = 0
     if "embedding_r" not in st.session_state:
-        st.session_state.embedding_r = None
+        st.session_state.embedding_r = 0
     if "smiles_q" not in st.session_state:
         st.session_state.smiles_q = None
     if "smiles_r" not in st.session_state:
@@ -84,89 +69,112 @@ def GUI():
         st.session_state.match_result = None
     if "data_r" not in st.session_state:
         st.session_state.data_r = None
-    col1,col2,col3 = st.columns([1,2,2])
-    with col1:
-        if st.button('Embedding'):
-            MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,2)
-            MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl'))
-            if query_msp_file is not None:
-                data_q = ProcessMSP(query_msp_file.name)
-                st.session_state.smiles_q = data_q[1]
-                st.session_state.embedding_q = EmbeddingMSBERT(MSBERTmodel,data_q)
-                with col2:
-                    st.write("Query dataset embedding finished.")
-            else: 
-                with col2:
-                    st.write("No query dataset uploaded.")
-            if reference_msp_file is not None:
-                data_r = ProcessMSP(reference_msp_file.name)
-                st.session_state.smiles_r = data_r[1]
-                st.session_state.embedding_r = EmbeddingMSBERT(MSBERTmodel,data_r)
-                with col3:
-                    st.write("Reference dataset embedding finished.")
-            elif reference_pickle_file is not None:
-                info = LoadPickle(reference_pickle_file.name)
-                st.session_state.embedding_r = info[0]
-                st.session_state.smiles_r = info[1]
-                with col3:
-                    st.write("Load embedding dataset finished.")
-            else:
-                with col3:
-                    st.write("No reference dataset uploaded.")
-        
-    st.write('If you want to save the embedding results of the dataset, ',
-             'you can click the save button.')         
-    path = st.text_input('Save path')
-    col4,col5,col6 = st.columns([1,1,1])
-    with col4:
-        if st.button('Save Dataset'):
-            try:
-                with open(path,'wb') as f:
-                    pass
-            except:
-                with col5:
-                    st.write('No save path')
+    if "query_msp_file" not in st.session_state:
+        st.session_state.query_msp_file = None
+    if "reference_msp_file" not in st.session_state:
+        st.session_state.reference_msp_file = None
+    if "reference_pickle_file" not in st.session_state:
+        st.session_state.reference_pickle_file = None
+    app_mode = st.sidebar.selectbox('Select mode',['Query dataset',
+                                                   'Reference dataset',
+                                                   'Dataset match'])
+    if app_mode == 'Query dataset':
+        st.subheader('Query dataset')
+        st.write('Query spectral dataset file (.msp)')
+        st.session_state.query_msp_file = st.file_uploader('Upload MSP file(.msp)', type='msp',
+                                                           accept_multiple_files=False,key=1)
+        col1,col2 = st.columns([1,1])
+        with col1:
+            if st.button('Embedding'):
+                if st.session_state.query_msp_file is not None:
+                    data_q = ProcessMSP(st.session_state.query_msp_file.name)
+                    st.session_state.smiles_q = data_q[1]
+                    st.session_state.embedding_q = EmbeddingMSBERT(MSBERTmodel,data_q)
+                    with col2:
+                        st.write("Query dataset embedding finished.")
+                else: 
+                    with col2:
+                        st.write("No query dataset uploaded.")
             
-            try:
-                with open(path,'wb') as f: 
-                    pickle.dump([st.session_state.embedding_r,
-                                 st.session_state.smiles_r],f)
-                with col5:
-                    st.write('done')
-            except:
-                with col6:
-                    st.write('No embedding result')
-    if st.button('Dataset match'):
-        st.session_state.match_result = DatasetMatch(st.session_state.embedding_r,
-                                                     st.session_state.embedding_q,
-                                                     st.session_state.smiles_r,
-                                                     st.session_state.smiles_q)
-        st.write('Done')
-        df = {'index':list(np.arange(len(st.session_state.match_result))+1),
-              'SMILES':st.session_state.match_result}
-        st.dataframe(df)
+    if app_mode == 'Reference dataset':
+        st.subheader('Reference dataset')
+        st.write('The format of the reference dataset is optional.', 
+                 'The first format is the msp format, and the second format is the pickle format.' ,
+                 'If the reference dataset file (pickle) was saved in previous experiments,',
+                 'it can be used directly to save time.')
+        st.write('Reference spectral dataset file (.msp)')
+        st.session_state.reference_msp_file = st.file_uploader('Upload MSP file(.msp)', type='msp',
+                                                               accept_multiple_files=False,key=3)
+        st.write('Reference spectral dataset file (.pickle)')
+        st.session_state.reference_pickle_file = st.file_uploader('Upload pickle file(.pickle)', type='pickle',
+                                                                  accept_multiple_files=False,key=4)
+        col1,col2 = st.columns([1,1])
+        with col1:
+            if st.button('Embedding'):
+                if st.session_state.reference_msp_file is not None:
+                    data_r = ProcessMSP(st.session_state.reference_msp_file.name)
+                    st.session_state.smiles_r = data_r[1]
+                    st.session_state.embedding_r = EmbeddingMSBERT(MSBERTmodel,data_r)
+                    with col2:
+                        st.write("Reference dataset embedding finished.")
+                elif st.session_state.reference_pickle_file is not None:
+                    info = LoadPickle(st.session_state.reference_pickle_file.name)
+                    st.session_state.embedding_r = info[0]
+                    st.session_state.smiles_r = info[1]
+                    with col2:
+                        st.write("Load embedding dataset finished.")
+                else:
+                    with col2:
+                        st.write("No reference dataset uploaded.")
+        st.write('If you want to save the embedding results of the dataset, ',
+                 'you can click the save button.')         
+        path = st.text_input('Save path')
+        col4,col5,col6 = st.columns([1,1,1])
+        with col4:
+            if st.button('Save Dataset'):
+                try:
+                    with open(path,'wb') as f:
+                        pass
+                except:
+                    with col5:
+                        st.write('No save path')
+                
+                try:
+                    with open(path,'wb') as f: 
+                        pickle.dump([st.session_state.embedding_r,
+                                     st.session_state.smiles_r],f)
+                    with col5:
+                        st.write('done')
+                except:
+                    with col6:
+                        st.write('No embedding result')
+            
+    if app_mode == 'Dataset match':
+        st.subheader('Dataset match')
+        col1,col2= st.columns([1,2])
+        with col1:
+            if st.button('Dataset match'):
+                # try:
+                if type(st.session_state.embedding_r) == int:
+                    with col2:
+                        st.write('No reference embedding result')
+                elif type(st.session_state.embedding_r) == int:
+                    with col2:
+                        st.write('No query embedding result')
+                else:
+                    st.session_state.match_result = DatasetMatch(st.session_state.embedding_r,
+                                                                 st.session_state.embedding_q,
+                                                                 st.session_state.smiles_r,
+                                                                 st.session_state.smiles_q)
+                    with col2:
+                        st.write('Done')
+                        df = {'index':list(np.arange(len(st.session_state.match_result))+1),
+                              'SMILES':st.session_state.match_result}
+                        st.dataframe(df)
 
 if __name__ == '__main__':
     GUI()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+sb2 = type(1)
 
 
 
