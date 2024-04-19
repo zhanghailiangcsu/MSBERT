@@ -10,8 +10,8 @@ The results are significantly better than Spec2Vec and cosine similarity.
 The rationality of embedding was demonstrated by reducing the dimensionality of the embedding vectors, calculating structural similarity, and spectra clustering. 
 
 # 2. Depends
-[Anaconda](https://www.anaconda.com) for Python 3.9  
-[Pytorch](https://pytorch.org/) 1.12  
+[Anaconda](https://www.anaconda.com) for Python 3.12  
+[Pytorch](https://pytorch.org/) 2.2  
 # 3. Install
 1.Install anaconda  
 2.Install [Git](https://git-scm.com/downloads)  
