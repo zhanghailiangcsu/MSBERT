@@ -4,7 +4,8 @@ Created on Mon Mar 25 17:05:57 2024
 
 @author: Administrator
 """
-
+import os
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 import numpy as np
 import streamlit as st
 import pandas as pd
@@ -15,6 +16,10 @@ from data.ProcessData import MakeTrainData
 from model.MSBERTModel import MSBERT
 import torch
 from model.utils import ModelEmbed
+import matplotlib.pyplot as plt
+from rdkit import Chem
+from rdkit.Chem import Draw
+import base64
 MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,2)
 MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl'))
 
@@ -55,8 +60,37 @@ def DatasetMatch(ref_arr,query_arr,ref_smiles,query_smiles):
         result_smiles.append(ref_smiles[position])
     return result_smiles
 
+def plot_data(data):
+    fig, ax = plt.subplots()
+    peaks = data.peaks.to_numpy
+    x = peaks[:,0]
+    y = peaks[:,1]
+    plt.vlines(x,0,y,linewidths=3)
+    plt.hlines(0,0,max(x)+10,linewidths=3)
+    plt.xlabel('m/z',fontsize=15)
+    plt.ylabel('Intensity',fontsize=15)
+    plt.tick_params(labelsize=15)
+    st.pyplot(fig)
+    
+def plot_smiles(smiles):
+    fig, ax = plt.subplots()
+    mol = Chem.MolFromSmiles(smiles)
+    img = Draw.MolToImage(mol)
+    # return img
+    st.image(img, use_column_width=True)
+    # img_base64 = base64.b64encode(img).decode()
+    # st.pyplot(fig)
+    
+def render_image():
+    
+    pass
+
 def GUI():
-    st.title("MSBERT: Embedding Tandem Mass Spectra into Chemically Rational Space")
+    # st.title("MSBERT: Embedding Tandem Mass Spectra into Chemically Rational Space")
+    title1,titl2 = st.columns([1,2])
+    with titl2:
+        st.title("MSBERT")
+    
     if "embedding_q" not in st.session_state:
         st.session_state.embedding_q = 0
     if "embedding_r" not in st.session_state:
@@ -75,6 +109,17 @@ def GUI():
         st.session_state.reference_msp_file = None
     if "reference_pickle_file" not in st.session_state:
         st.session_state.reference_pickle_file = None
+    if 'query_spec' not in st.session_state:
+        st.session_state.query_spec = None
+    if 'clicked_row_index' not in st.session_state:
+        st.session_state.clicked_row_index = None
+    if 'df' not in st.session_state:
+        st.session_state.df = None
+    if 'option' not in st.session_state:
+        st.session_state.option = None
+    if 'smiles_data' not in st.session_state:
+        st.session_state.smiles_data = None
+    
     app_mode = st.sidebar.selectbox('Select mode',['Query dataset',
                                                    'Reference dataset',
                                                    'Dataset match'])
@@ -88,6 +133,7 @@ def GUI():
             if st.button('Embedding'):
                 if st.session_state.query_msp_file is not None:
                     data_q = ProcessMSP(st.session_state.query_msp_file.name)
+                    st.session_state.query_spec = list(load_from_msp(st.session_state.query_msp_file.name))
                     st.session_state.smiles_q = data_q[1]
                     st.session_state.embedding_q = EmbeddingMSBERT(MSBERTmodel,data_q)
                     with col2:
@@ -151,30 +197,66 @@ def GUI():
             
     if app_mode == 'Dataset match':
         st.subheader('Dataset match')
-        col1,col2= st.columns([1,2])
-        with col1:
-            if st.button('Dataset match'):
-                # try:
-                if type(st.session_state.embedding_r) == int:
-                    with col2:
-                        st.write('No reference embedding result')
-                elif type(st.session_state.embedding_r) == int:
-                    with col2:
-                        st.write('No query embedding result')
-                else:
-                    st.session_state.match_result = DatasetMatch(st.session_state.embedding_r,
-                                                                 st.session_state.embedding_q,
-                                                                 st.session_state.smiles_r,
-                                                                 st.session_state.smiles_q)
-                    with col2:
-                        st.write('Done')
-                        df = {'index':list(np.arange(len(st.session_state.match_result))+1),
-                              'SMILES':st.session_state.match_result}
-                        st.dataframe(df)
-
+        # col7,col8= st.columns([1,3])
+        # with col7:
+        if st.button('Dataset match'):
+            # try:
+            if type(st.session_state.embedding_r) == int:
+                with col2:
+                    st.write('No reference embedding result')
+            elif type(st.session_state.embedding_r) == int:
+                with col2:
+                    st.write('No query embedding result')
+            else:
+                st.session_state.match_result = DatasetMatch(st.session_state.embedding_r,
+                                                              st.session_state.embedding_q,
+                                                              st.session_state.smiles_r,
+                                                              st.session_state.smiles_q)
+                st.session_state.smiles_data = st.session_state.match_result
+                st.session_state.df = {'index':list(np.arange(len(st.session_state.match_result))+1),
+                                        'SMILES':st.session_state.match_result}
+                st.subheader('MSBERT matching result table')
+                for x in range(len(st.session_state.match_result)+1):
+                    index,smiles,msms,image = st.columns([1.1,4,6,4])
+                    if x == 0:
+                        with index:
+                            st.write("<h1 style='text-align: center;font-size: 18px;'>Index</h1>",unsafe_allow_html=True)
+                        with smiles:
+                            st.write("<h1 style='text-align: center;font-size: 18px;'>SMILES</h1>",unsafe_allow_html=True)
+                        with msms:
+                            st.write("<h1 style='text-align: center;font-size: 18px;'>MS/MS Spectral</h1>",unsafe_allow_html=True)
+                        with image:
+                            st.write("<h1 style='text-align: center;font-size: 18px;'>Molecular Structure</h1>",unsafe_allow_html=True)
+                    else:
+                        with index:
+                            st.write(str(x))
+                        with smiles:
+                            st.write(st.session_state.match_result[x-1])
+                        with msms:
+                            plot_data(st.session_state.query_spec[x-1])
+                        with image:
+                            plot_smiles(st.session_state.match_result[x-1])
+                        
+            # st.table(st.session_state.df)
+           
+    # with col8:
+    #     # st.session_state.option = st.text_input('Select a MS/MS for display')
+    #     options = st.session_state.option = [str(i+1) for i in range(len(st.session_state.query_spec))]
+    #     st.session_state.option= st.selectbox('Select a MS/MS for display', options)
+       
+    #     if st.button('Display MS/MS'):
+    #         col9,col10 = st.columns([2,1])
+    #         index = int(st.session_state.option)
+    #         msms_data = st.session_state.query_spec[index]
+    #         with col9:
+    #             st.write('MS/MS Spectral')
+    #             plot_data(msms_data)
+    #         with col10:
+    #             st.write('Molecular Structure')
+    #             plot_smiles(st.session_state.smiles_data[index])
+                    
 if __name__ == '__main__':
     GUI()
-sb2 = type(1)
 
 
 
