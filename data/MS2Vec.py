@@ -27,7 +27,8 @@ class ms_to_vec:
         value = data[:,1] / np.nanmax(data[:,1])
         value[np.isnan(value)] = 0
         vector = np.zeros(length)
-        vector[index] = value
+        for s in range(len(value)):
+            vector[index[s]] = vector[index[s]]+value[s]
         if sparse_vec:
             return sparse.csr_matrix(vector)
         else:
