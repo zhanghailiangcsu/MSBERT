@@ -4,6 +4,8 @@ Created on Wed Sep 27 09:02:19 2023
 
 @author: Administrator
 """
+import os
+os.chdir('E:/github/MSBERT')
 import optuna
 from model.MSBERTModel import MSBERT,MyDataSet
 import torch.optim as optim
@@ -13,7 +15,7 @@ import torch
 from info_nce import InfoNCE
 import torch.utils.data as Data
 from timm.scheduler import CosineLRScheduler
-from data.LoadGNPS import MakeTrainData
+from data.ProcessData import MakeTrainData
 
 def objective(trial):
     '''
@@ -26,10 +28,11 @@ def objective(trial):
     attn_heads = trial.suggest_categorical('attn_heads',[2,4,8,16])
     epochs = trial.suggest_int('epochs',2,10)
     lr = trial.suggest_loguniform('lr',1e-5,1e-3)
+    temperature = trial.suggest_categorical('temperature',[1,0.5,0.1,0.07,0.05,0.01,0.005])
     
     dataset = MyDataSet(input_ids,intensity)
     dataloader = Data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    infoloss = InfoNCE(temperature=0.01)
+    infoloss = InfoNCE(temperature)
     criterion = nn.CrossEntropyLoss(ignore_index=0)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = MSBERT(100002, 512, n_layers, attn_heads, 0,100,3)
@@ -73,10 +76,11 @@ if __name__ == '__main__':
     vocab_size = len(word2idx)
     input_ids, intensity = zip(*train_ref) 
     intensity = [torch.FloatTensor(i) for i in intensity] 
+    input_ids = [torch.LongTensor(i) for i in input_ids]
     
     study_name = 'MSBERT'
     study = optuna.create_study(study_name=study_name,direction="maximize")
-    study.optimize(objective, n_trials=20)
+    study.optimize(objective, n_trials=50)
     params = study.best_params
     df = study.trials_dataframe(attrs=('number', 'value', 'params', 'state'))
     optuna.visualization.matplotlib.plot_optimization_history(study)
