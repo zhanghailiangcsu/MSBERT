@@ -122,7 +122,7 @@ def GUI():
     
     app_mode = st.sidebar.selectbox('Select mode',['Query dataset',
                                                    'Reference dataset',
-                                                   'Dataset match'])
+                                                   'Library matching'])
     if app_mode == 'Query dataset':
         st.subheader('Query dataset')
         st.write('Query spectral dataset file (.msp)')
@@ -195,11 +195,11 @@ def GUI():
                     with col6:
                         st.write('No embedding result')
             
-    if app_mode == 'Dataset match':
-        st.subheader('Dataset match')
+    if app_mode == 'Library matching':
+        st.subheader('Library matching')
         # col7,col8= st.columns([1,3])
         # with col7:
-        if st.button('Dataset match'):
+        if st.button('Library matching'):
             # try:
             if type(st.session_state.embedding_r) == int:
                 with col2:
