@@ -124,7 +124,7 @@ def GUI():
                                                    'Reference dataset',
                                                    'Library matching'])
     if app_mode == 'Query dataset':
-        st.subheader('Query dataset')
+        st.subheader('Query dataset embedding')
         st.write('Query spectral dataset file (.msp)')
         st.session_state.query_msp_file = st.file_uploader('Upload MSP file(.msp)', type='msp',
                                                            accept_multiple_files=False,key=1)
@@ -143,7 +143,7 @@ def GUI():
                         st.write("No query dataset uploaded.")
             
     if app_mode == 'Reference dataset':
-        st.subheader('Reference dataset')
+        st.subheader('Reference dataset embedding')
         st.write('The format of the reference dataset is optional.', 
                  'The first format is the msp format, and the second format is the pickle format.' ,
                  'If the reference dataset file (pickle) was saved in previous experiments,',
