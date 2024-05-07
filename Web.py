@@ -20,10 +20,12 @@ import matplotlib.pyplot as plt
 from rdkit import Chem
 # from rdkit.Chem import Draw
 import base64
-import urllib.request
+import requests
 path = 'model/MSBERT.pkl'
 url = 'https://github.com/zhanghailiangcsu/MSBERT/releases/download/1.0/MSBERT.pkl'
-urllib.request.urlretrieve(url, path)
+response = requests.get(url)
+with open(path, 'wb') as file:
+    file.write(response.content)
 
 MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,2)
 MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl'))
