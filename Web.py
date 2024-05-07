@@ -18,7 +18,7 @@ import torch
 from model.utils import ModelEmbed
 import matplotlib.pyplot as plt
 from rdkit import Chem
-from rdkit.Chem import Draw
+# from rdkit.Chem import Draw
 import base64
 MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,2)
 MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl'))
