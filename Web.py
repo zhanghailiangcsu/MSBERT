@@ -19,12 +19,11 @@ from model.utils import ModelEmbed
 import matplotlib.pyplot as plt
 from rdkit import Chem
 # from rdkit.Chem import Draw
-import base64
 import wget
 path = 'model/MSBERT.pkl'
 url = 'https://github.com/zhanghailiangcsu/MSBERT/releases/download/1.0/MSBERT.pkl'
 wget.download(url,path)
-
+device = torch.device("cpu")
 MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,2)
 MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl'),map_location=torch.device('cpu'))
 
@@ -81,14 +80,8 @@ def plot_smiles(smiles):
     fig, ax = plt.subplots()
     mol = Chem.MolFromSmiles(smiles)
     img = Draw.MolToImage(mol)
-    # return img
     st.image(img, use_column_width=True)
-    # img_base64 = base64.b64encode(img).decode()
-    # st.pyplot(fig)
     
-def render_image():
-    
-    pass
 
 def GUI():
     # st.title("MSBERT: Embedding Tandem Mass Spectra into Chemically Rational Space")
