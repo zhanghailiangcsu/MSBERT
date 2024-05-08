@@ -25,7 +25,7 @@ url = 'https://github.com/zhanghailiangcsu/MSBERT/releases/download/1.0/MSBERT.p
 wget.download(url,path)
 device = torch.device("cpu")
 MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,2)
-MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl'),map_location=torch.device('cpu'))
+MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl',map_location=torch.device('cpu')))
 
 def ProcessMSP(file):
     '''
