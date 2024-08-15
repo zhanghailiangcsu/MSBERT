@@ -41,7 +41,7 @@ class Mask(nn.Module):
             mask_bool = mask_bool.to(device)
             mask_bool_list.append(mask_bool.unsqueeze(0))
             mask_token = x[p,:][mask_pos]
-            if len_mask < self.max_pred:
+            if len_mask <= self.max_pred:
                 n_pad = self.max_pred - len_mask
                 mask_pos = torch.cat((mask_pos,torch.zeros(n_pad).long().to(device)),dim=0)
                 mask_token = torch.cat((mask_token,torch.zeros(n_pad).long().to(device)),dim=0)
