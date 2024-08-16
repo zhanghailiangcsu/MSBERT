@@ -18,11 +18,7 @@ import torch
 from model.utils import ModelEmbed
 import matplotlib.pyplot as plt
 from rdkit import Chem
-# from rdkit.Chem import Draw
-import wget
-path = 'model/MSBERT.pkl'
-url = 'https://github.com/zhanghailiangcsu/MSBERT/releases/download/1.0/MSBERT.pkl'
-wget.download(url,path)
+from rdkit.Chem import Draw
 device = torch.device("cpu")
 MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,2)
 MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl',map_location=torch.device('cpu')))
@@ -123,8 +119,9 @@ def GUI():
                                                    'Library matching'])
     if app_mode == 'Query dataset':
         st.subheader('Query dataset embedding')
-        st.write('Query spectral dataset file (.msp)')
-        st.session_state.query_msp_file = st.file_uploader('Upload MSP file(.msp)', type='msp',
+        st.write('Query spectral dataset file')
+        st.session_state.query_msp_file = st.file_uploader('Upload MSP file(msp,mgf,mzML)',
+                                                           type=['msp','mgf','mzML'],
                                                            accept_multiple_files=False,key=1)
         col1,col2 = st.columns([1,1])
         with col1:
@@ -146,8 +143,9 @@ def GUI():
                  'The first format is the msp format, and the second format is the pickle format.' ,
                  'If the reference dataset file (pickle) was saved in previous experiments,',
                  'it can be used directly to save time.')
-        st.write('Reference spectral dataset file (.msp)')
-        st.session_state.reference_msp_file = st.file_uploader('Upload MSP file(.msp)', type='msp',
+        st.write('Reference spectral dataset file')
+        st.session_state.reference_msp_file = st.file_uploader('Upload MSP file(msp,mgf,mzML)', 
+                                                               type=['msp','mgf','mzML'],
                                                                accept_multiple_files=False,key=3)
         st.write('Reference spectral dataset file (.pickle)')
         st.session_state.reference_pickle_file = st.file_uploader('Upload pickle file(.pickle)', type='pickle',
