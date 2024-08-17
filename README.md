@@ -38,7 +38,7 @@ You can download the trained model on Github.
 Then refer to the example to use the model for prediction, and directly obtain the embedding vectors from MS/MS.
 Alternatively, you can retrain MSBEERT on your own data refer to example.  
 If you want to use MSBERT web services, you can use the following two methods.
-The first method is to use the [link]([https://huggingface.co/spaces/zhanghailiangcsu/MSBERT])
+The first method is to use the [link](https://huggingface.co/spaces/zhanghailiangcsu/MSBERT)
 The second method is to run the following code.  
 ```
 streamlit run Web.py
