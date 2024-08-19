@@ -9,7 +9,7 @@ os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 import numpy as np
 import streamlit as st
 import pandas as pd
-from matchms.importing import load_from_msp
+from matchms.importing import load_from_msp,load_from_mgf,load_from_mzml
 import pickle
 from data.LoadGNPS import ProDataset
 from data.ProcessData import MakeTrainData
@@ -23,11 +23,18 @@ device = torch.device("cpu")
 MSBERTmodel = MSBERT(100002, 512, 6, 16, 0,100,2)
 MSBERTmodel.load_state_dict(torch.load('model/MSBERT.pkl',map_location=torch.device('cpu')))
 
+
 def ProcessMSP(file):
     '''
     Load dataset from MSP and prepare for MSBERT
     '''
-    msms = list(load_from_msp(file))
+    p = file.find('.')
+    if file[p:] == '.msp':
+        msms = list(load_from_msp(file))
+    elif file[p:] == '.mgf':
+        msms = list(load_from_mgf(file))
+    elif file[p:] == '.mzML':
+        msms = list(load_from_mzml(file))
     pro_data = ProDataset([msms],2,99)
     msms = [i[2] for i in pro_data]
     precursor = [i[1] for i in pro_data]
@@ -80,7 +87,7 @@ def plot_smiles(smiles):
     
 
 def GUI():
-    # st.title("MSBERT: Embedding Tandem Mass Spectra into Chemically Rational Space")
+    
     title1,titl2 = st.columns([1,2])
     with titl2:
         st.title("MSBERT")
@@ -119,7 +126,7 @@ def GUI():
                                                    'Library matching'])
     if app_mode == 'Query dataset':
         st.subheader('Query dataset embedding')
-        st.write('Query spectral dataset file')
+        st.write('Query spectral dataset file(positive mode)')
         st.session_state.query_msp_file = st.file_uploader('Upload MSP file(msp,mgf,mzML)',
                                                            type=['msp','mgf','mzML'],
                                                            accept_multiple_files=False,key=1)
@@ -143,7 +150,7 @@ def GUI():
                  'The first format is the msp format, and the second format is the pickle format.' ,
                  'If the reference dataset file (pickle) was saved in previous experiments,',
                  'it can be used directly to save time.')
-        st.write('Reference spectral dataset file')
+        st.write('Reference spectral dataset file(positive mode)')
         st.session_state.reference_msp_file = st.file_uploader('Upload MSP file(msp,mgf,mzML)', 
                                                                type=['msp','mgf','mzML'],
                                                                accept_multiple_files=False,key=3)
