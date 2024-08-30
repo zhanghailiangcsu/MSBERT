@@ -9,8 +9,7 @@ import torch
 import matplotlib.pyplot as plt
 from data.ProcessData import MakeTrainData
 from model.MSBERTModel import MSBERT
-from model.utils import ModelEmbed
-from scipy.spatial.distance import cosine
+from model.utils import ModelEmbed, ProcessMSP,MSBERTSimilarity
 
 def PlotExample(example_msms,idx):
     plt.figure()
@@ -20,18 +19,17 @@ def PlotExample(example_msms,idx):
     plt.ylabel('Intensity')
     
 if __name__ == '__main__':
-
-    with open('example/example_msms.pickle', 'rb') as f:
-        example_msms = pickle.load(f)
-    with open('example/example_precursor.pickle', 'rb') as f:
-        example_precursor= pickle.load(f)
-    
-    PlotExample(example_msms,0)
-    PlotExample(example_msms,1)
-    example_data,word2idx= MakeTrainData(example_msms,example_precursor,100)
     
     model_file = 'E:/MSBERT_model/1025/MSBERT.pkl'
-    model = MSBERT(len(word2idx), 512, 6, 16, 0,100,3)
+    model = MSBERT(100002, 512, 6, 16, 0,100,3)
     model.load_state_dict(torch.load(model_file))
-    example_arr= ModelEmbed(model,example_data,2)
-    cos = cosine(example_arr[0,:],example_arr[1,:])
+    
+    demo_file = 'example/demo.msp'
+    demo_data,demo_smiles = ProcessMSP(demo_file)
+    demo_arr = ModelEmbed(model,demo_data,16)
+    
+    
+    PlotExample(demo_data,0)
+    PlotExample(demo_data,1)
+    
+    cos = MSBERTSimilarity(demo_arr,demo_arr)
