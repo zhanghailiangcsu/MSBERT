@@ -14,6 +14,8 @@ import pickle
 from data.LoadGNPS import ProDataset,MakeDataset
 from data.ProcessData import MakeTestData,MakeTrainData
 from data.MS2Vec import ms_to_vec
+from matchms.importing import load_from_msp,load_from_mgf,load_from_mzml
+from scipy.spatial.distance import cosine
 
 def CalCosineTop(qtof_ref,qtof_query):
     '''
@@ -111,6 +113,7 @@ def ModelEmbed(model,test_data,batch_size):
     embed_arr = embed_arr.reshape(embed_arr.shape[0],embed_arr.shape[2])
     return embed_arr
 
+
 def SearchTop(dataset_arr,query_arr,dataset_smiles,query_smiles,batch):
     '''
     Top-n metrics for computing library matching
@@ -159,4 +162,32 @@ def PlotStepLoss(train_loss,step=100):
     plt.plot(step_loss)
     plt.xlabel('Steps')
     plt.ylabel('Loss')
+    
+def ProcessMSP(file):
+    '''
+    Load dataset from MSP and prepare for MSBERT
+    '''
+    p = file.find('.')
+    if file[p:] == '.msp':
+        msms = list(load_from_msp(file))
+    elif file[p:] == '.mgf':
+        msms = list(load_from_mgf(file))
+    elif file[p:] == '.mzML':
+        msms = list(load_from_mzml(file))
+    pro_data = ProDataset([msms],2,99)
+    msms = [i[2] for i in pro_data]
+    precursor = [i[1] for i in pro_data]
+    smiles = [i[0] for i in pro_data]
+    data,_ = MakeTrainData(msms,precursor,100)
+    return data,smiles
+
+def MSBERTSimilarity(r_arr,q_arr):
+    similarity = np.zeros((r_arr.shape[0],q_arr.shape[0]))
+    for i in range(r_arr.shape[0]):
+        v1 = r_arr[i,:]
+        for j in range(q_arr.shape[0]):
+            v2 = q_arr[j,:]
+            cos_ij = cosine(v1,v2)
+            similarity[i,j] = 1-cos_ij
+    return similarity
 
