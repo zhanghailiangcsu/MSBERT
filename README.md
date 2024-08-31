@@ -37,6 +37,27 @@ The MSBERT is public at [homepage](https://github.com/zhanghailiangcsu), every u
 You can download the trained model on Github.
 Then refer to the example to use the model for prediction, and directly obtain the embedding vectors from MS/MS.
 Alternatively, you can retrain MSBEERT on your own data refer to example.  
+```
+import pickle
+import torch
+import matplotlib.pyplot as plt
+from data.ProcessData import MakeTrainData
+from model.MSBERTModel import MSBERT
+from model.utils import ModelEmbed, ProcessMSP,MSBERTSimilarity
+
+# Load model
+model_file = 'E:/MSBERT_model/1025/MSBERT.pkl'
+model = MSBERT(100002, 512, 6, 16, 0,100,3)
+model.load_state_dict(torch.load(model_file))
+
+# Load demo file
+demo_file = 'example/demo.msp'
+demo_data,demo_smiles = ProcessMSP(demo_file)
+demo_arr = ModelEmbed(model,demo_data,16)
+
+#Calculate the similarity after MSBERT embedding
+cos = MSBERTSimilarity(demo_arr,demo_arr)
+```
 If you want to use MSBERT web services, you can use the following two methods.
 The first method is to use the [link](https://huggingface.co/spaces/zhanghailiangcsu/MSBERT)
 The second method is to run the following code.  
