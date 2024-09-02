@@ -24,7 +24,7 @@ if __name__ == '__main__':
     model = MSBERT(100002, 512, 6, 16, 0,100,3)
     model.load_state_dict(torch.load(model_file))
     
-    demo_file = 'example/demo.msp'
+    demo_file = 'example/demo_msms.msp'
     demo_data,demo_smiles = ProcessMSP(demo_file)
     demo_arr = ModelEmbed(model,demo_data,16)
     
