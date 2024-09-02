@@ -20,7 +20,7 @@ def PlotExample(example_msms,idx):
     
 if __name__ == '__main__':
     
-    model_file = 'E:/MSBERT_model/1025/MSBERT.pkl'
+    model_file = 'model/MSBERT.pkl'
     model = MSBERT(100002, 512, 6, 16, 0,100,3)
     model.load_state_dict(torch.load(model_file))
     
