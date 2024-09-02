@@ -93,6 +93,19 @@ def DatasetSep(input_ids,intensity,val_size = 0.1):
 def ModelEmbed(model,test_data,batch_size):
     '''
     Using MSBERT for MS/MS embedding
+    Parameters
+    ----------
+    model
+        MSBERT model.
+    test_data : list
+        Data for MSBERT.
+    batch_size : int
+    
+    Returns
+    -------
+    embed_arr : array
+        MSBERT embedding results.
+
     '''
     input_ids, intensity = zip(*test_data)
     intensity = [torch.FloatTensor(i) for i in intensity] 
@@ -166,6 +179,16 @@ def PlotStepLoss(train_loss,step=100):
 def ProcessMSP(file):
     '''
     Load dataset from MSP and prepare for MSBERT
+    Parameters
+    ----------
+    file : str
+        The Path of MS/MS spectra.
+    Returns
+    -------
+    data : list
+        Data for MSBERT.
+    smiles : TYPE
+        SMILES for MS/MS.
     '''
     p = file.find('.')
     if file[p:] == '.msp':
@@ -182,6 +205,20 @@ def ProcessMSP(file):
     return data,smiles
 
 def MSBERTSimilarity(r_arr,q_arr):
+    '''
+    Parameters
+    ----------
+    r_arr : array
+        Reference vectors Embedded by MSBERT.
+    q_arr : array
+        Query vectors Embedded by MSBERT.
+
+    Returns
+    -------
+    similarity : arrray
+        Similarity matrix.
+
+    '''
     similarity = np.zeros((r_arr.shape[0],q_arr.shape[0]))
     for i in range(r_arr.shape[0]):
         v1 = r_arr[i,:]
