@@ -36,6 +36,7 @@ pip3 install torch torchvision torchaudio --index-url https://download.pytorch.o
 The MSBERT is public at [homepage](https://github.com/zhanghailiangcsu), every user can download and use it.
 You can download the trained model on Github.
 Then refer to the example to use the model for prediction, and directly obtain the embedding vectors from MS/MS.
+If you have any questions, you can refer to the help documentation or contact the author.
 Alternatively, you can retrain MSBEERT on your own data refer to example.  
 ```
 import pickle
@@ -65,7 +66,7 @@ The second method is to run the following code.
 streamlit run Web.py
 ```
 # 5.Data available
-The filtered GNPS dataset used in this experiment was uploaded to [Zenodo](https://zenodo.org/records/13347207).
+The filtered GNPS dataset used in this experiment was uploaded to [Zenodo](https://zenodo.org/records/13626334).
 # 6. About Spec2Vec
 We retrained a Spec2Vec model on the filter GNPS dataset.
 The training script and file(ipynb) can be accessed at the [link](https://github.com/zhanghailiangcsu/MSBERT/tree/main/Spec2VecModel).
