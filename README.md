@@ -74,7 +74,7 @@ The training data can be accessed at [link](https://zenodo.org/records/13347207)
 With the uploaded script and training data, it is easy for users to repeat this part of the experiment.
 # 6.Integrate MSBERT into the matchms workflow
 We have integrated MSBERT similarity calculation into the matchms workflow.
-We have uploaded the [data](https://github.com/zhanghailiangcsu/MSBERT/matchms_workflow/demo_msms.msp) and [script](https://github.com/zhanghailiangcsu/MSBERT/matchms_workflow/Demo.py) for the example of integrating MSBERT into the matchms workflow.
+We have uploaded the [data](https://github.com/zhanghailiangcsu/MSBERT/matchms_workflow) and [script](https://github.com/zhanghailiangcsu/MSBERT/matchms_workflow) for the example of integrating MSBERT into the matchms workflow.
 Users can easily integrate MSBERT into the matchchms process by referring to this section. 
 The example code is as follows.
 ```
