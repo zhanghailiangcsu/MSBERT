@@ -72,6 +72,28 @@ We retrained a Spec2Vec model on the filter GNPS dataset.
 The training script and file(ipynb) can be accessed at the [link](https://github.com/zhanghailiangcsu/MSBERT/tree/main/Spec2VecModel).
 The training data can be accessed at [link](https://zenodo.org/records/13347207).
 With the uploaded script and training data, it is easy for users to repeat this part of the experiment.
-# 6.Contact
+# 6.Integrate MSBERT into the matchms workflow
+We have integrated MSBERT similarity calculation into the matchms workflow.
+We have uploaded the [data](https://github.com/zhanghailiangcsu/MSBERT/matchms_workflow/demo_msms.msp) and [script](https://github.com/zhanghailiangcsu/MSBERT/matchms_workflow/Demo.py) for the example of integrating MSBERT into the matchms workflow.
+Users can easily integrate MSBERT into the matchchms process by referring to this section. 
+The example code is as follows.
+```
+from matchms_workflow.Similarity import FilterSpectra,MSBERTSimilarity
+from matchms.importing import load_from_msp
+from matchms import calculate_scores
+
+# Load demo file
+demofile = 'matchms_workflow/demo_msms.msp'
+spectra = list(load_from_msp(demofile))
+spectra = FilterSpectra(spectra)
+
+# Calculate MSBERT similarity scores between all spectra in matchms workflow
+MSBERT_Similarity = MSBERTSimilarity()
+scores = calculate_scores(references=spectra,
+                          queries=spectra,
+                          similarity_function=MSBERT_Similarity).to_array()
+
+```
+# 7.Contact
 Hailiang Zhang  
 E-mail 2352434994@qq.com  
