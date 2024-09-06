@@ -71,7 +71,7 @@ The filtered GNPS dataset used in this experiment was uploaded to [Zenodo](https
 We retrained a Spec2Vec model on the filter GNPS dataset.
 The training script and file(ipynb) can be accessed at the [link](https://github.com/zhanghailiangcsu/MSBERT/tree/main/Spec2VecModel).
 The training data can be accessed at [link](https://zenodo.org/records/13691734).
-The training data can be downloaded at [link](https://zenodo.org/records/13691734).
+The training model can be downloaded at [link](https://zenodo.org/records/13691734).
 With the uploaded script and training data, it is easy for users to repeat this part of the experiment.
 # 6.Integrate MSBERT into the matchms workflow
 We have integrated MSBERT similarity calculation into the matchms workflow.
