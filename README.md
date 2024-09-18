@@ -68,10 +68,10 @@ streamlit run Web.py
 # 5.Data available
 The filtered GNPS dataset used in this experiment was uploaded to [Zenodo](https://zenodo.org/records/13722644).
 # 6. About Spec2Vec
-We retrained a Spec2Vec model on the filter GNPS dataset.
-The training script and file(ipynb) can be accessed at the [link](https://github.com/zhanghailiangcsu/MSBERT/tree/main/Spec2VecModel).
+We retrained three Spec2Vec models on the filter GNPS dataset according to instrument type.
+The training script and file(ipynb) on GNPS Orbitrap set can be accessed at the [link](https://github.com/zhanghailiangcsu/MSBERT/tree/main/Spec2VecModel).
 The training data can be accessed at [link](https://zenodo.org/records/13722644).
-The training model can be downloaded at [link](https://zenodo.org/records/13722644).
+The trained model can be downloaded at [link](https://zenodo.org/records/13722644).
 With the uploaded script and training data, it is easy for users to repeat this part of the experiment.
 # 6.Integrate MSBERT into the matchms workflow
 We have integrated MSBERT similarity calculation into the matchms workflow.
