@@ -17,7 +17,7 @@ The rationality of embedding was demonstrated by reducing the dimensionality of 
 2.Install [Git](https://git-scm.com/downloads)  
 3.Open commond line, create environment and enter with the following commands.   
 ```
-conda create -n MSBERT python=3.9  
+conda create -n MSBERT python=3.12 
 conda activate MSBERT
 ```
 4.Clone the repository and enter.  
